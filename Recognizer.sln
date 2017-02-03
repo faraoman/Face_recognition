@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recognizer.prj", "Recognizer.prj\Recognizer.prj.csproj", "{625FF591-8D70-459E-A063-F8C03AA216C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recognizer.gui", "Recognizer.prj\Recognizer.gui.csproj", "{625FF591-8D70-459E-A063-F8C03AA216C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
