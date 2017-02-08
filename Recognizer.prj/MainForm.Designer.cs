@@ -1,4 +1,4 @@
-﻿namespace Recognizer.prj
+﻿namespace Recognizer
 {
 	partial class MainForm
 	{

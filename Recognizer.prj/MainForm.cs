@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using OpenCvSharp;
 
-namespace Recognizer.prj
+namespace Recognizer
 {
 	public partial class MainForm : Form
 	{

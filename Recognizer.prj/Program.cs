@@ -1,22 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using Autofac;
+using Mallenom.AppServices;
 
-namespace Recognizer.prj
+namespace Recognizer
 {
 	static class Program
 	{
-		/// <summary>
-		/// Главная точка входа для приложения.
-		/// </summary>
 		[STAThread]
 		static void Main()
 		{
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new MainForm());
+			var appServcies = new AppCriticalServices();
+			using(var container = RegistrationServices.CreateContainer(appServcies))
+			using(var appBootstrapper = container.Resolve<AppBootstrapper>())
+			{
+				var appConfiguration = container.Resolve<IApplicationConfiguration>();
+				appConfiguration.Load();
+				// Fix-me: удалите
+				var tpu = container.Resolve<TestParametersUser>();
+				appBootstrapper.Run();
+				appConfiguration.Save();
+			}	
 		}
 	}
 }
