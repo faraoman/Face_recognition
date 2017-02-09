@@ -57,6 +57,15 @@
     <Reference Include="mallenom.framework">
       <HintPath>..\Libs\mallenom.framework.dll</HintPath>
     </Reference>
+    <Reference Include="mallenom.imaging">
+      <HintPath>..\Libs\mallenom.imaging.dll</HintPath>
+    </Reference>
+    <Reference Include="mallenom.video">
+      <HintPath>..\Libs\mallenom.video.dll</HintPath>
+    </Reference>
+    <Reference Include="mallenom.video.ipcam">
+      <HintPath>..\Libs\mallenom.video.ipcam.dll</HintPath>
+    </Reference>
     <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenCvSharp-AnyCPU.2.4.10.20170126\lib\net45\OpenCvSharp.dll</HintPath>
       <Private>True</Private>
@@ -79,6 +88,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
