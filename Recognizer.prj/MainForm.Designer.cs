@@ -32,6 +32,7 @@
 			this._btnTestCamera = new System.Windows.Forms.Button();
 			this.logView1 = new Mallenom.Diagnostics.Logs.LogView();
 			this.videoImage1 = new Mallenom.Imaging.VideoImage();
+			this._btnTestBtn = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// _btnTestOpenCV
@@ -72,11 +73,22 @@
 			this.videoImage1.TabIndex = 4;
 			this.videoImage1.Text = "videoImage1";
 			// 
+			// _btnTestBtn
+			// 
+			this._btnTestBtn.Location = new System.Drawing.Point(420, 71);
+			this._btnTestBtn.Name = "_btnTestBtn";
+			this._btnTestBtn.Size = new System.Drawing.Size(132, 23);
+			this._btnTestBtn.TabIndex = 5;
+			this._btnTestBtn.Text = "TestForm";
+			this._btnTestBtn.UseVisualStyleBackColor = true;
+			this._btnTestBtn.Click += new System.EventHandler(this._btnTestBtn_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(562, 474);
+			this.Controls.Add(this._btnTestBtn);
 			this.Controls.Add(this.videoImage1);
 			this.Controls.Add(this.logView1);
 			this.Controls.Add(this._btnTestCamera);
@@ -94,6 +106,7 @@
 		private System.Windows.Forms.Button _btnTestCamera;
 		private Mallenom.Diagnostics.Logs.LogView logView1;
 		private Mallenom.Imaging.VideoImage videoImage1;
+		private System.Windows.Forms.Button _btnTestBtn;
 	}
 }
 

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using OpenCvSharp;
+using OpenCvSharp.CPlusPlus;
 
 namespace Recognizer
 {
@@ -15,21 +17,25 @@ namespace Recognizer
 
 		private void OnButtonTestOpenCV_Click(object sender, EventArgs e)
 		{
-			using(IplImage image = new IplImage(256, 256, BitDepth.U8, 1))
+			OpenFileDialog openFile = new OpenFileDialog();
+			openFile.Title = "Выберите картинку";
+			openFile.InitialDirectory = Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Photo");
+			openFile.Filter = "Images|*.jpg;*.png;*.bmp|All files|*.*";
+
+			if(openFile.ShowDialog() == DialogResult.OK)
 			{
-				image.Zero();
-				for(int x = 0; x < image.Width; x++)
+				var detector = new FaceDetector(openFile.FileName);
+
+				detector.DetectFaces();
+				detector.DrawFaceRectangles();
+
+				var img = detector.OutputImage;
+
+				using(var window = new CvWindow("Picture", img))
 				{
-					for(int y = 0; y < image.Height; y++)
-					{
-						int offset = y * image.WidthStep + x;
-						byte value = (byte)(x + y);
-						Marshal.WriteByte(image.ImageData, offset, value);
-					}
-				}
-				using(CvWindow window = new CvWindow("Success!", WindowMode.AutoSize, image))
-				{
-					CvWindow.WaitKey();
+					Cv.WaitKey();
 				}
 			}
 		}
@@ -37,7 +43,7 @@ namespace Recognizer
 		private void OnButtonTestCamera_Click(object sender, EventArgs e)
 		{
 			IplImage frame = null;
-			IplImage src = null;
+			//IplImage src = null;
 			CvCapture capture = null;
 			
 			//CvWindow windowCapture = new CvWindow("Camera capture");
@@ -90,6 +96,17 @@ namespace Recognizer
 				}
 				Debug.WriteLine("End");
 			}				
+		}
+
+		private void _btnTestBtn_Click(object sender, EventArgs e)
+		{
+			using(TestForm testForm = new TestForm())
+			{
+				if(testForm.ShowDialog() != DialogResult.Cancel)
+				{
+
+				}
+			}
 		}
 	}
 }
