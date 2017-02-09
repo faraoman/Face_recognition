@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
+
 using OpenCvSharp;
-using OpenCvSharp.Blob;
 using OpenCvSharp.CPlusPlus;
 
 namespace Recognizer
@@ -65,9 +60,13 @@ namespace Recognizer
 		/// </returns>
 		public Rect[] DetectFaces()
 		{
-			// Detect faceRectangles
+			// Detect face rectangles
 			DetectedFaces = Classifier.DetectMultiScale(
-				ImageMatrix, 1.095, 6, HaarDetectionType.ScaleImage, new Size(30, 30));
+				image: ImageMatrix,
+				scaleFactor: 1.095,
+				minNeighbors: 3,
+				flags: HaarDetectionType.ScaleImage,
+				minSize: new Size(30, 30));
 			OutputImage = ImageMatrix.ToIplImage();
 
 			return DetectedFaces;
@@ -83,13 +82,9 @@ namespace Recognizer
 				foreach(var faceRectangle in DetectedFaces)
 				{
 					OutputImage.DrawRect(
-						faceRectangle,
-						new CvScalar(
-							140,
-							60,
-							170,
-							10),
-						2);
+						rect: faceRectangle,
+						color: new CvScalar(140, 60, 170, 10),
+						thickness: 2);
 				}
 			}
 		} 

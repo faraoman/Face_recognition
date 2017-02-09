@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.ModelConfiguration;
 
-namespace Recognizer.prj.DataBase
+namespace Recognizer.DataBase
 {
 	public sealed class Employees
 	{
