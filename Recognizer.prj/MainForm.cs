@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
-
+using Mallenom.Imaging;
+using Mallenom.Setup;
+using Mallenom.Video;
 using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
 using Recognizer.Detector;
@@ -17,6 +19,8 @@ namespace Recognizer
 		private static LinkedList<Mat> _images = new LinkedList<Mat>();
 		// список меток
 		private static LinkedList<int> _labels = new LinkedList<int>();
+		IVideoSourceProvider _provider;
+		IVideoSource _videoSource;
 
 		public MainForm()
 		{
@@ -51,6 +55,10 @@ namespace Recognizer
 			_labels.AddLast(2);
 			_labels.AddLast(2);
 			_labels.AddLast(2);
+
+			_provider = new IPCameraSourceProvider();
+			_videoSource = _provider.CreateVideoSource();
+
 		}
 
 		private void OnButtonTestOpenCV_Click(object sender, EventArgs e)
@@ -158,6 +166,36 @@ namespace Recognizer
 
 				}
 			}
+		}
+
+		private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+		{
+
+		}
+
+		private void настройкиToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			using(var setupForm = new SingleControlSetupForm(_provider.CreateSetupControl(_videoSource)))
+			{
+				if(setupForm.ShowDialog(this) == DialogResult.OK)
+				{
+					_videoSource.Stop();
+					_videoSource.Start();
+				}
+			}
+		}
+
+		private void выходToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			this.Close();
+		}
+
+		private void спискиToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			using(var formLists = new UserLists())
+			{
+				formLists.ShowDialog(this);
+			}					
 		}
 	}
 }
