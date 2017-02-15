@@ -1,17 +1,56 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
 using OpenCvSharp;
+using OpenCvSharp.CPlusPlus;
+using Recognizer.Detector;
+using Recognizer.Recognition;
 
 namespace Recognizer
 {
 	public partial class MainForm : Form
 	{
+		// список изображений
+		private static LinkedList<Mat> _images = new LinkedList<Mat>();
+		// список меток
+		private static LinkedList<int> _labels = new LinkedList<int>();
+
 		public MainForm()
 		{
 			InitializeComponent();
+		
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\angry.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\happy.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\normal.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\sad.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\smiled.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\surprised.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\wow.png", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\test.png", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\leftlighted.png", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\e.png", LoadMode.GrayScale));
+
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\happy.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\normal.jpg", LoadMode.GrayScale));
+			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\surprised.jpg", LoadMode.GrayScale));
+
+			_labels.AddLast(1);
+			_labels.AddLast(1);
+			_labels.AddLast(1);
+			_labels.AddLast(1);
+			_labels.AddLast(1);
+			_labels.AddLast(1);
+			_labels.AddLast(1);
+			_labels.AddLast(1);
+			//_labels.AddLast(1);
+			//_labels.AddLast(1);
+
+			_labels.AddLast(2);
+			_labels.AddLast(2);
+			_labels.AddLast(2);
 		}
 
 		private void OnButtonTestOpenCV_Click(object sender, EventArgs e)
@@ -30,11 +69,24 @@ namespace Recognizer
 				detector.DetectFaces();
 				detector.DrawFaceRectangles();
 
-				var img = detector.OutputImage;
+				FisherFaceRecognizer recognizer = new FisherFaceRecognizer();
+				recognizer.Train(_images, _labels);
+				recognizer.Save();
 
-				using(var window = new CvWindow("Picture", img))
+				using(var window = new Window("Picture", detector.OutputMatrix))
 				{
 					Cv.WaitKey();
+				}
+
+				foreach(var face in detector.FacesRepository)
+				{
+					int result = recognizer.Recognize(face);
+					//face.SaveImage(@"E:\Study\C#\FaceRecognition\Faces\gray\wow.png");
+
+					using(var faceWindow = new Window("Picture", face))
+					{
+						Cv.WaitKey();
+					}
 				}
 			}
 		}

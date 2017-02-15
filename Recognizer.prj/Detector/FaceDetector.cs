@@ -1,12 +1,18 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 
 using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
 
-namespace Recognizer
+namespace Recognizer.Detector
 {
 	public sealed class FaceDetector
 	{
+		#region Constants
+		private const int IMG_WIDTH = 300;
+		private const int IMG_HEIGHT = 300; 
+		#endregion
+
 		#region .ctor
 		/// <summary> 
 		/// Создаёт объект <see cref="FaceDetector"/>
@@ -20,9 +26,13 @@ namespace Recognizer
 					"Samples",
 					"haarcascade_frontalface_default.xml"));
 
-			ImageMatrix = new Mat(
+			InputMatrix = new Mat(
 				imagePath,
 				LoadMode.AnyColor);
+
+			OutputMatrix = InputMatrix.Clone();
+
+			FacesRepository = new List<Mat>();
 		}
 		#endregion
 
@@ -36,17 +46,22 @@ namespace Recognizer
 		/// <summary> 
 		/// Матрица полученного изображения.
 		/// </summary>
-		public Mat ImageMatrix { get; set; }
+		public Mat InputMatrix { get; set; }
 
 		/// <summary> 
 		/// Изображение с распознанными лицами. 
 		/// </summary>
-		public IplImage OutputImage { get; set; }
+		public Mat OutputMatrix { get; set; }
 
 		/// <summary> 
 		/// Массив прямоугольных областей <seealso cref="Rect"/>, внутри которых обнаружены лица.
 		/// </summary>
 		public Rect[] DetectedFaces { get; set; }
+
+		/// <summary>
+		/// Список распознанных лиц
+		/// </summary>
+		public List<Mat> FacesRepository { get; set; }
 
 		#endregion
 
@@ -62,13 +77,22 @@ namespace Recognizer
 		{
 			// Detect face rectangles
 			DetectedFaces = Classifier.DetectMultiScale(
-				image: ImageMatrix,
-				scaleFactor: 1.095,
-				minNeighbors: 3,
+				image: InputMatrix,
+				scaleFactor: 1.35,
+				minNeighbors: 5,
 				flags: HaarDetectionType.ScaleImage,
-				minSize: new Size(30, 30));
-			OutputImage = ImageMatrix.ToIplImage();
+				minSize: new Size(30, 30),
+				maxSize: InputMatrix.Size());
 
+			foreach(var faceRect in DetectedFaces)
+			{
+				Mat face = new Mat(InputMatrix, roi: faceRect)
+					.ResizeImage(IMG_WIDTH, IMG_HEIGHT)
+					.ConvertToGray();
+
+				FacesRepository.Add(face);
+			}
+			
 			return DetectedFaces;
 		}
 	
@@ -77,14 +101,11 @@ namespace Recognizer
 		/// </summary>
 		public void DrawFaceRectangles()
 		{
-			if(OutputImage != null)
+			if(OutputMatrix != null)
 			{
 				foreach(var faceRectangle in DetectedFaces)
 				{
-					OutputImage.DrawRect(
-						rect: faceRectangle,
-						color: new CvScalar(140, 60, 170, 10),
-						thickness: 2);
+					OutputMatrix.DrawRect(faceRectangle);
 				}
 			}
 		} 
