@@ -56,6 +56,5 @@ namespace Recognizer.Detector
 
 			return src;
 		}
-
 	}
 }

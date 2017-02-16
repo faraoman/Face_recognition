@@ -92,8 +92,8 @@ namespace Recognizer.Detector
 
 				FacesRepository.Add(face);
 			}
-			
-			return DetectedFaces;
+
+				return DetectedFaces;
 		}
 	
 		/// <summary>

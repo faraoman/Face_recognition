@@ -16,45 +16,55 @@ namespace Recognizer
 	public partial class MainForm : Form
 	{
 		// список изображений
-		private static LinkedList<Mat> _images = new LinkedList<Mat>();
+		//private static LinkedList<Mat> _images = new LinkedList<Mat>();
 		// список меток
-		private static LinkedList<int> _labels = new LinkedList<int>();
+		//private static LinkedList<int> _labels = new LinkedList<int>();
+
 		IVideoSourceProvider _provider;
 		IVideoSource _videoSource;
 
 		public MainForm()
 		{
 			InitializeComponent();
-		
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\angry.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\happy.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\normal.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\sad.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\smiled.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\surprised.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\wow.png", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\test.png", LoadMode.GrayScale));
+
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\pavel.png", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\angry.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\happy.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\normal.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\sad.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\smiled.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\surprised.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\wow.png", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\test.png", LoadMode.GrayScale));
 			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\leftlighted.png", LoadMode.GrayScale));
 			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\e.png", LoadMode.GrayScale));
 
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\happy.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\normal.jpg", LoadMode.GrayScale));
-			_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\surprised.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\happy.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\normal.jpg", LoadMode.GrayScale));
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\surprised.jpg", LoadMode.GrayScale));
 
-			_labels.AddLast(1);
-			_labels.AddLast(1);
-			_labels.AddLast(1);
-			_labels.AddLast(1);
-			_labels.AddLast(1);
-			_labels.AddLast(1);
-			_labels.AddLast(1);
-			_labels.AddLast(1);
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\andrey2.png", LoadMode.GrayScale));
+
+			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\matvey.png", LoadMode.GrayScale));
+
 			//_labels.AddLast(1);
 			//_labels.AddLast(1);
+			//_labels.AddLast(1);
+			//_labels.AddLast(1);
+			//_labels.AddLast(1);
+			//_labels.AddLast(1);
+			//_labels.AddLast(1);
+			//_labels.AddLast(1);
+			////_labels.AddLast(1);
+			////_labels.AddLast(1);
 
-			_labels.AddLast(2);
-			_labels.AddLast(2);
-			_labels.AddLast(2);
+			//_labels.AddLast(2);
+			//_labels.AddLast(2);
+			//_labels.AddLast(2);
+
+			//_labels.AddLast(3);
+
+			//_labels.AddLast(4);
 
 			_provider = new IPCameraSourceProvider();
 			_videoSource = _provider.CreateVideoSource();
@@ -77,9 +87,17 @@ namespace Recognizer
 				detector.DetectFaces();
 				detector.DrawFaceRectangles();
 
-				FisherFaceRecognizer recognizer = new FisherFaceRecognizer();
-				recognizer.Train(_images, _labels);
-				recognizer.Save();
+				LBPFaceRecognizer recognizer = new LBPFaceRecognizer();
+
+				string trainDataPath = Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples",
+					"LBPFaces.xml");
+
+				//recognizer.Train(_images, _labels);
+				//recognizer.Save(trainDataPath);
+
+				recognizer.Load(trainDataPath);
 
 				using(var window = new Window("Picture", detector.OutputMatrix))
 				{
@@ -89,7 +107,6 @@ namespace Recognizer
 				foreach(var face in detector.FacesRepository)
 				{
 					int result = recognizer.Recognize(face);
-					//face.SaveImage(@"E:\Study\C#\FaceRecognition\Faces\gray\wow.png");
 
 					using(var faceWindow = new Window("Picture", face))
 					{
