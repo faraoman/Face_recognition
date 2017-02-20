@@ -134,6 +134,11 @@
     <Compile Include="AppCriticalServices.cs" />
     <Compile Include="ConfigurationModule.cs" />
     <Compile Include="Database\DatabaseService.cs" />
+    <Compile Include="Database\FaceRecognizerContext.cs" />
+    <Compile Include="Database\IConnectionStringProvider.cs" />
+    <Compile Include="Database\IDbConnectionFactory.cs" />
+    <Compile Include="Database\SqlServerConnectionConfiguration.cs" />
+    <Compile Include="Database\SqlServerConnectionFactory.cs" />
     <Compile Include="Detector\FaceDetector.cs" />
     <Compile Include="Detector\MatExtensions.cs" />
     <Compile Include="Entities\Employees.cs" />

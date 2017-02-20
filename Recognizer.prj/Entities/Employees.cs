@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.Infrastructure.Annotations;
 using System.Data.Entity.ModelConfiguration;
-using OpenCvSharp.CPlusPlus;
 
 namespace Recognizer.Entities
 {
@@ -33,11 +33,10 @@ namespace Recognizer.Entities
 					.IsUnicode()
 					.HasMaxLength(30);
 
-				Property(e => e.MaskPhoto)
-					.IsRequired();
+				Property(e => e.PersonLabel)
+					.IsRequired()
+					.HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new IndexAttribute("IX_DatabasePlateIndex", 1) { IsUnique = true }));
 
-				Property(e => e.SourcePhoto)
-					.IsOptional();
 			}
 		}
 
@@ -49,15 +48,17 @@ namespace Recognizer.Entities
 
 		public long Id { get; set; }
 
+		[Column("Имя")]
 		public string FirstName { get; set; }
 
+		[Column("Фамилия")]
 		public string LastName { get; set; }
 
+		[Column("Отчество")]
 		public string Patronymic { get; set; }
 
-		public byte[] MaskPhoto { get; set; }
-
-		public byte[] SourcePhoto { get; set; }
+		[Column("Метка")]
+		public long PersonLabel { get; set; }
 
 		#endregion
 

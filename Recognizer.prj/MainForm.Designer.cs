@@ -31,7 +31,7 @@
 			this._btnTestOpenCV = new System.Windows.Forms.Button();
 			this._btnTestCamera = new System.Windows.Forms.Button();
 			this.logView1 = new Mallenom.Diagnostics.Logs.LogView();
-			this.videoImage1 = new Mallenom.Imaging.VideoImage();
+			this._videoImage = new Mallenom.Imaging.VideoImage();
 			this._btnTestBtn = new System.Windows.Forms.Button();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.сервисToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,12 +75,12 @@
 			// 
 			// videoImage1
 			// 
-			this.videoImage1.FooterFont = new System.Drawing.Font("Courier New", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
-			this.videoImage1.FPSFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
-			this.videoImage1.Location = new System.Drawing.Point(0, 27);
-			this.videoImage1.Name = "videoImage1";
-			this.videoImage1.Size = new System.Drawing.Size(500, 500);
-			this.videoImage1.TabIndex = 4;
+			this._videoImage.FooterFont = new System.Drawing.Font("Courier New", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
+			this._videoImage.FPSFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
+			this._videoImage.Location = new System.Drawing.Point(0, 27);
+			this._videoImage.Name = "videoImage1";
+			this._videoImage.Size = new System.Drawing.Size(500, 500);
+			this._videoImage.TabIndex = 4;
 			// 
 			// _btnTestBtn
 			// 
@@ -178,7 +178,7 @@
 			this.Controls.Add(this.listView1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this._btnTestBtn);
-			this.Controls.Add(this.videoImage1);
+			this.Controls.Add(this._videoImage);
 			this.Controls.Add(this.logView1);
 			this.Controls.Add(this._btnTestCamera);
 			this.Controls.Add(this._btnTestOpenCV);
@@ -199,7 +199,7 @@
 		private System.Windows.Forms.Button _btnTestOpenCV;
 		private System.Windows.Forms.Button _btnTestCamera;
 		private Mallenom.Diagnostics.Logs.LogView logView1;
-		private Mallenom.Imaging.VideoImage videoImage1;
+		private Mallenom.Imaging.VideoImage _videoImage;
 		private System.Windows.Forms.Button _btnTestBtn;
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem сервисToolStripMenuItem;

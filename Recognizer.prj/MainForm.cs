@@ -11,64 +11,46 @@ using OpenCvSharp.CPlusPlus;
 using Recognizer.Detector;
 using Recognizer.Recognition;
 
+
+
+//Написать фейковый класс, который вернул бы какие-то записи из БД (Для Сони).
 namespace Recognizer
 {
 	public partial class MainForm : Form
 	{
-		// список изображений
-		//private static LinkedList<Mat> _images = new LinkedList<Mat>();
-		// список меток
-		//private static LinkedList<int> _labels = new LinkedList<int>();
-
 		IVideoSourceProvider _provider;
 		IVideoSource _videoSource;
+		IImageMatrix _matrix;
 
 		public MainForm()
 		{
 			InitializeComponent();
 
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\pavel.png", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\angry.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\happy.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\normal.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\sad.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\smiled.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\surprised.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\wow.png", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\test.png", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\leftlighted.png", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\e.png", LoadMode.GrayScale));
-
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\happy.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\normal.jpg", LoadMode.GrayScale));
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\2\surprised.jpg", LoadMode.GrayScale));
-
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\andrey2.png", LoadMode.GrayScale));
-
-			//_images.AddLast(new Mat(@"E:\Study\C#\FaceRecognition\Faces\gray\matvey.png", LoadMode.GrayScale));
-
-			//_labels.AddLast(1);
-			//_labels.AddLast(1);
-			//_labels.AddLast(1);
-			//_labels.AddLast(1);
-			//_labels.AddLast(1);
-			//_labels.AddLast(1);
-			//_labels.AddLast(1);
-			//_labels.AddLast(1);
-			////_labels.AddLast(1);
-			////_labels.AddLast(1);
-
-			//_labels.AddLast(2);
-			//_labels.AddLast(2);
-			//_labels.AddLast(2);
-
-			//_labels.AddLast(3);
-
-			//_labels.AddLast(4);
-
 			_provider = new IPCameraSourceProvider();
 			_videoSource = _provider.CreateVideoSource();
+			_matrix = new ColorMatrix();
 
+			_videoImage.Matrix = _matrix;
+
+			_videoImage.ManualUpdateRendererCache = true;
+			_videoImage.SizeMode = ImageSizeMode.Zoom;
+
+			_videoSource.AttachMatrix(_matrix);
+			_videoSource.MatrixUpdated += OnMatrixUpdated;
+			_videoSource.Open();			
+		}
+
+		int _counter;
+		int _skipFrames = 3;
+
+		private void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
+		{
+			if(_counter >= _skipFrames)
+			{
+				//
+				_counter = 0;
+			}
+			_counter++;
 		}
 
 		private void OnButtonTestOpenCV_Click(object sender, EventArgs e)
