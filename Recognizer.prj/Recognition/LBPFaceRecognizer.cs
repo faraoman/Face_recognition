@@ -34,6 +34,12 @@ namespace Recognizer.Recognition
 			_recognizer.Load(filePath);
 		}
 
+		public void Load()
+		{
+			var filePath = Recognizer.Properties.Resources.LBPFaces;
+			_recognizer.Load(filePath);
+		}
+
 		public int Recognize(Mat image)
 		{
 			// Метка

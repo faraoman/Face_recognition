@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-
+using Mallenom.Imaging;
 using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
+using OpenCvSharp.Extensions;
 
 namespace Recognizer.Detector
 {
@@ -20,11 +21,28 @@ namespace Recognizer.Detector
 		/// <param name="imagePath"> Путь к файлу с изображением. </param>
 		public FaceDetector(string imagePath)
 		{
+			//current
+			//если будет использоваться, то убрать COPY в названии создаваемого файла
+			var xmlfile_string = Properties.Resources.haarcascade_frontalface_default;
+
+			Directory.CreateDirectory(Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples"));
+
+			File.WriteAllText(Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples",
+					"haarcascade_frontalface_defaultCOPY.xml"), xmlfile_string);
+			//current
+
+
+			//удалить строку снизу, удалить слеши комментария
 			Classifier = new CascadeClassifier(
 				Path.Combine(
 					Directory.GetCurrentDirectory(),
 					"Samples",
-					"haarcascade_frontalface_default.xml"));
+					//"haarcascade_frontalface_default.xml"));
+					"haarcascade_frontalface_defaultCOPY.xml"));
 
 			InputMatrix = new Mat(
 				imagePath,
@@ -34,6 +52,61 @@ namespace Recognizer.Detector
 
 			FacesRepository = new List<Mat>();
 		}
+
+
+		//
+		/**/
+
+		/// <summary> 
+		/// Создаёт объект <see cref="FaceDetector"/>
+		/// </summary>
+		/// <param name="colorMatrix"> Цветная матрица изображения. </param>
+		public FaceDetector(ColorMatrix colorMatrix)
+		{
+			Classifier = new CascadeClassifier(
+				Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples",
+					"haarcascade_frontalface_default.xml"));
+
+			//getting bitmap from colorMatrix
+			System.Drawing.Bitmap bitmap = colorMatrix.CreateBitmap();
+
+			//converting System.Drawing.Bitmap -> OpenCVSharp.CPlusPlus.Mat
+			Mat mat = BitmapConverter.ToMat(bitmap);
+
+			InputMatrix = mat;
+			OutputMatrix = InputMatrix.Clone();
+
+			FacesRepository = new List<Mat>();
+		}
+
+
+		/// <summary> 
+		/// Создаёт объект <see cref="FaceDetector"/>
+		/// </summary>
+		/// <param name="videoImage"> Изображение. </param>
+		public FaceDetector(VideoImage videoImage)
+		{
+			Classifier = new CascadeClassifier(
+				Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples",
+					"haarcascade_frontalface_default.xml"));
+
+			//creating bitmap
+			System.Drawing.Bitmap bitmap = videoImage.Matrix.CreateBitmap();
+
+			//converting System.Drawing.Bitmap -> OpenCVSharp.CPlusPlus.Mat
+			if(bitmap != null) { 
+				Mat mat = BitmapConverter.ToMat(bitmap);
+				InputMatrix = mat;
+				OutputMatrix = InputMatrix.Clone();
+			}
+
+			FacesRepository = new List<Mat>();
+		}
+		/**/
 		#endregion
 
 		#region Properties
@@ -84,6 +157,7 @@ namespace Recognizer.Detector
 				minSize: new Size(30, 30),
 				maxSize: InputMatrix.Size());
 
+
 			foreach(var faceRect in DetectedFaces)
 			{
 				Mat face = new Mat(InputMatrix, roi: faceRect)
@@ -108,7 +182,21 @@ namespace Recognizer.Detector
 					OutputMatrix.DrawRect(faceRectangle);
 				}
 			}
-		} 
+		}
+
+		/// <summary>
+		/// Обновляет свойства InputMatrix и OutputMatrix новыми значениями, полученными из colorMatrix. 
+		/// </summary>
+		public void UpdateImages(System.Drawing.Bitmap bitmap)
+		{
+			if(bitmap != null)
+			{
+				Mat mat = BitmapConverter.ToMat(bitmap);
+
+				InputMatrix = mat;
+				OutputMatrix = InputMatrix.Clone();
+			}
+		}
 		#endregion
 
 	}
