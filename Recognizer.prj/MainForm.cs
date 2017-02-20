@@ -11,8 +11,6 @@ using OpenCvSharp.CPlusPlus;
 using Recognizer.Detector;
 using Recognizer.Recognition;
 
-
-
 //Написать фейковый класс, который вернул бы какие-то записи из БД (Для Сони).
 namespace Recognizer
 {
@@ -21,6 +19,8 @@ namespace Recognizer
 		IVideoSourceProvider _provider;
 		IVideoSource _videoSource;
 		IImageMatrix _matrix;
+
+		FaceDetector _faceDetector;
 
 		public MainForm()
 		{
@@ -31,26 +31,35 @@ namespace Recognizer
 			_matrix = new ColorMatrix();
 
 			_videoImage.Matrix = _matrix;
-
 			_videoImage.ManualUpdateRendererCache = true;
 			_videoImage.SizeMode = ImageSizeMode.Zoom;
 
 			_videoSource.AttachMatrix(_matrix);
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
-			_videoSource.Open();			
+			_videoSource.Open();
+
+			//НУЖНО получить из потока изображение	
+			_faceDetector = new FaceDetector(_videoImage);
+
 		}
 
-		int _counter;
-		int _skipFrames = 3;
+		private int _frameCounter;
+		private int _skipFrames = 3;
 
 		private void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
 		{
-			if(_counter >= _skipFrames)
+			if(_frameCounter >= _skipFrames)
 			{
-				//
-				_counter = 0;
+				//устанавливаем кадр, который требуется проанализировать
+				_faceDetector.UpdateImages(_matrix.CreateBitmap());
+
+				//пытаемся распознать человека FaceRecognizer'ом
+				_faceDetector.DetectFaces();
+				_faceDetector.DrawFaceRectangles();
+				
+				_frameCounter = 0;
 			}
-			_counter++;
+			_frameCounter++;
 		}
 
 		private void OnButtonTestOpenCV_Click(object sender, EventArgs e)
@@ -76,10 +85,29 @@ namespace Recognizer
 					"Samples",
 					"LBPFaces.xml");
 
+
 				//recognizer.Train(_images, _labels);
 				//recognizer.Save(trainDataPath);
 
+				//!Примерно вот так можно скопировать из ресурсов строку во вновь созданный файл
+				/**/
+				var facesxml_string = Properties.Resources.LBPFaces;
+
+
+				File.WriteAllText(Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples",
+					"LBPFacesCOPY.xml"), facesxml_string);
+
+				trainDataPath = Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples",
+					"LBPFacesCOPY.xml");
+				//recognizer.Load();
+				/**/
+
 				recognizer.Load(trainDataPath);
+				
 
 				using(var window = new Window("Picture", detector.OutputMatrix))
 				{
