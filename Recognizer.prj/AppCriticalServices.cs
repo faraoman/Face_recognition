@@ -12,7 +12,9 @@ namespace Recognizer
 		public AppCriticalServices()
 		{
 			_applicationProfileService = new ApplicationProfileService("Mallenom", "FaceRecognizer");
-			_logsDirectory = _applicationProfileService.LocalMachine.RegisterDirectory(@"Logs", ApplicationProfileDirectoryUsage.Logs);
+			_logsDirectory = _applicationProfileService
+				.LocalMachine
+				.RegisterDirectory(@"Logs", ApplicationProfileDirectoryUsage.Logs);
 		}
 
 		public void Register(ContainerBuilder builder)
@@ -24,7 +26,10 @@ namespace Recognizer
 				.As<IApplicationProfileService>()
 				.SingleInstance();
 
-			builder.RegisterInstance(_logsDirectory).Named<IApplicationProfileDirectory>("logs").ExternallyOwned();
+			builder
+				.RegisterInstance(_logsDirectory)
+				.Named<IApplicationProfileDirectory>("logs")
+				.ExternallyOwned();
 		}
 	}
 }

@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace Recognizer.Database
 {
-	public class SqlServerConnectionFactory : IDbConnectionFactory
+	public sealed class SqlServerConnectionFactory : IDbConnectionFactory
 	{
 		#region .ctor
 

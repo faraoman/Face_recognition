@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Recognizer.Database
 {
-	public class SqlServerConnectionConfiguration : IConnectionStringProvider
+	public sealed class SqlServerConnectionConfiguration : IConnectionStringProvider
 	{
 		#region .ctor
 

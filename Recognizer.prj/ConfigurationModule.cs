@@ -40,7 +40,7 @@ namespace Recognizer
 		}
 	}
 
-	class ConfigurationModule : Module
+	class ConfigurationModule : Autofac.Module
 	{
 		protected override void Load(ContainerBuilder builder)
 		{
@@ -58,10 +58,22 @@ namespace Recognizer
 					.RegisterDirectory(@"Configuration", ApplicationProfileDirectoryUsage.Configuration))
 				.Named<IApplicationProfileDirectory>(@"configuration")
 				.SingleInstance();
-			
+
+			//// Здесь я пытаюсь зарегистрировать папку с логами.
+			//builder.Register(
+			//	context => context
+			//		.Resolve<IApplicationProfileService>()
+			//		.LocalMachine
+			//		.RegisterDirectory(@"Logs", ApplicationProfileDirectoryUsage.Logs))
+			//	.Named<IApplicationProfileDirectory>(@"logs")
+			//	.SingleInstance();
+
 			builder.RegisterSerializableConfiguration("Core", "TestParameters", TestParameters.Serializer, TestParameters.Defaults);
 
-			builder.RegisterType<TestParametersUser>().SingleInstance().AsSelf();
+			builder
+				.RegisterType<TestParametersUser>()
+				.SingleInstance()
+				.AsSelf();
 
 			builder
 				.RegisterType<RootApplicationConfigurationFile>()
@@ -69,6 +81,13 @@ namespace Recognizer
 				.WithParameter(ResolvedParameter.ForNamed<IApplicationProfileDirectory>(@"configuration"))
 				.WithParameter(new NamedParameter(@"fileName", "FaceRecognizer.cfg"))
 				.SingleInstance();
+
+			//builder
+			//	.RegisterType<RootApplicationConfigurationFile>()
+			//	.As<>()
+			//	.WithParameter(ResolvedParameter.ForNamed<IApplicationProfileDirectory>(@"configuration"))
+			//	.WithParameter(new NamedParameter(@"fileName", "FaceRecognizer.cfg"))
+			//	.SingleInstance();
 		}
 	}
 }

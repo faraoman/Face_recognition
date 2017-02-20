@@ -9,8 +9,8 @@ namespace Recognizer
 		[STAThread]
 		static void Main()
 		{
-			var appServcies = new AppCriticalServices();
-			using(var container = RegistrationServices.CreateContainer(appServcies))
+			var appServices = new AppCriticalServices();
+			using(var container = RegistrationServices.CreateContainer(appServices))
 			using(var appBootstrapper = container.Resolve<AppBootstrapper>())
 			{
 				var appConfiguration = container.Resolve<IApplicationConfiguration>();

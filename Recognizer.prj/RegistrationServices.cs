@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Mallenom;
+using Recognizer.Database;
 
 namespace Recognizer
 {
@@ -18,7 +19,13 @@ namespace Recognizer
 				.SingleInstance()
 				.AsSelf();
 
+			containerBuilder
+				.RegisterType<DatabaseService>()
+				.SingleInstance()
+				.AsSelf();
+
 			containerBuilder.RegisterModule<ConfigurationModule>();
+			containerBuilder.RegisterModule<DatabaseModule>();
 
 			return containerBuilder.Build();
 		}

@@ -84,12 +84,6 @@ namespace Recognizer.Detector
 				minSize: new Size(30, 30),
 				maxSize: InputMatrix.Size());
 
-			CascadeClassifier classifier = new CascadeClassifier(
-				Path.Combine(
-					Directory.GetCurrentDirectory(),
-					"Samples",
-					"haarcascade_eye.xml"));
-
 			foreach(var faceRect in DetectedFaces)
 			{
 				Mat face = new Mat(InputMatrix, roi: faceRect)

@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace Recognizer.Database
 {
-	public class DatabaseService
+	public sealed class DatabaseService
 	{
 		public DbContext CreateContext()
 		{

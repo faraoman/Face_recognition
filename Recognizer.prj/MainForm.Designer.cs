@@ -95,8 +95,8 @@
 			// menuStrip1
 			// 
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.сервисToolStripMenuItem,
-            this.базаДанныхToolStripMenuItem});
+			this.сервисToolStripMenuItem,
+			this.базаДанныхToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
 			this.menuStrip1.Size = new System.Drawing.Size(747, 24);
@@ -107,9 +107,9 @@
 			// сервисToolStripMenuItem
 			// 
 			this.сервисToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.настройкиToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.выходToolStripMenuItem});
+			this.настройкиToolStripMenuItem,
+			this.toolStripMenuItem1,
+			this.выходToolStripMenuItem});
 			this.сервисToolStripMenuItem.Name = "сервисToolStripMenuItem";
 			this.сервисToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
 			this.сервисToolStripMenuItem.Text = "Сервис";
@@ -117,7 +117,7 @@
 			// базаДанныхToolStripMenuItem
 			// 
 			this.базаДанныхToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.спискиToolStripMenuItem});
+			this.спискиToolStripMenuItem});
 			this.базаДанныхToolStripMenuItem.Name = "базаДанныхToolStripMenuItem";
 			this.базаДанныхToolStripMenuItem.Size = new System.Drawing.Size(86, 20);
 			this.базаДанныхToolStripMenuItem.Text = "База данных";

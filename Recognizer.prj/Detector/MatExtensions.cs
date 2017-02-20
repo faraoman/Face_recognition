@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenCvSharp;
+﻿using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
 
 namespace Recognizer.Detector
@@ -51,7 +46,7 @@ namespace Recognizer.Detector
 		{
 			src.Rectangle(
 				rect,
-				color: new Scalar(140, 60, 170, 10),
+				color: new Scalar(50, 255, 50, 10),
 				thickness: 2);
 
 			return src;

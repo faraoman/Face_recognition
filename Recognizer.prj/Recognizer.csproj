@@ -133,6 +133,7 @@
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="AppCriticalServices.cs" />
     <Compile Include="ConfigurationModule.cs" />
+    <Compile Include="Database\DatabaseModule.cs" />
     <Compile Include="Database\DatabaseService.cs" />
     <Compile Include="Database\FaceRecognizerContext.cs" />
     <Compile Include="Database\IConnectionStringProvider.cs" />
@@ -142,6 +143,12 @@
     <Compile Include="Detector\FaceDetector.cs" />
     <Compile Include="Detector\MatExtensions.cs" />
     <Compile Include="Entities\Employees.cs" />
+    <Compile Include="Logs\ILog.cs" />
+    <Compile Include="Logs\ILogConfiguration.cs" />
+    <Compile Include="Logs\RecognizerLogConfigurations.cs" />
+    <Compile Include="Logs\RecognizerLogFactory.cs" />
+    <Compile Include="Logs\RecognizerLogger.cs" />
+    <Compile Include="Logs\Log.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
