@@ -16,18 +16,18 @@ namespace Recognizer
 {
 	public partial class MainForm : Form
 	{
-		IVideoSourceProvider _provider;
+		IVideoSourceProvider _videoSourceProvider;
 		IVideoSource _videoSource;
 		IImageMatrix _matrix;
 
 		FaceDetector _faceDetector;
 
-		public MainForm()
+		public MainForm(IVideoSourceProvider videoSourceProvider, IVideoSource videoSource)
 		{
 			InitializeComponent();
 
-			_provider = new IPCameraSourceProvider();
-			_videoSource = _provider.CreateVideoSource();
+			_videoSourceProvider = videoSourceProvider;
+			_videoSource = videoSource;
 			_matrix = new ColorMatrix();
 
 			_videoImage.Matrix = _matrix;
@@ -202,7 +202,7 @@ namespace Recognizer
 
 		private void настройкиToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			using(var setupForm = new SingleControlSetupForm(_provider.CreateSetupControl(_videoSource)))
+			using(var setupForm = new SingleControlSetupForm(_videoSourceProvider.CreateSetupControl(_videoSource)))
 			{
 				if(setupForm.ShowDialog(this) == DialogResult.OK)
 				{

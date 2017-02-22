@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-
+using Mallenom.AppServices;
 
 namespace Recognizer.Logs
 {
@@ -8,15 +8,15 @@ namespace Recognizer.Logs
 	{
 		#region .ctor
 
-		public RecognizerLogger(ILogConfiguration logConfiguration)
+		public RecognizerLogger(IApplicationProfileDirectory directory)
 		{
-			Configuration = logConfiguration;
+			Directory = directory;
 		}
 		#endregion
 
 		#region Properties
 
-		ILogConfiguration Configuration { get; set; }
+		IApplicationProfileDirectory Directory { get; set; }
 		#endregion
 
 		#region Methods

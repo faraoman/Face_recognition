@@ -41,6 +41,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -50,6 +51,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>E38C943E400858978BDFB32B4C9405DE395A495C</ManifestCertificateThumbprint>
@@ -61,7 +63,7 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac, Version=4.3.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
@@ -141,12 +143,16 @@
     <Compile Include="..\shared\external\Debug.cs">
       <Link>shared\Debug.cs</Link>
     </Compile>
+    <Compile Include="..\shared\external\Native.cs">
+      <Link>shared\Native.cs</Link>
+    </Compile>
     <Compile Include="..\shared\external\Verify.cs">
       <Link>shared\Verify.cs</Link>
     </Compile>
     <Compile Include="AppBootstrapper.cs" />
     <Compile Include="AppCriticalServices.cs" />
-    <Compile Include="ConfigurationModule.cs" />
+    <Compile Include="Configuration\ConfigurationModule.cs" />
+    <Compile Include="Configuration\VideoSourceConfiguration.cs" />
     <Compile Include="Database\DatabaseModule.cs" />
     <Compile Include="Database\DatabaseService.cs" />
     <Compile Include="Database\FaceRecognizerContext.cs" />
@@ -159,8 +165,9 @@
     <Compile Include="Entities\Employees.cs" />
     <Compile Include="Logs\ILog.cs" />
     <Compile Include="Logs\ILogConfiguration.cs" />
+    <Compile Include="Logs\ILoggingService.cs" />
+    <Compile Include="Logs\LoggingService.cs" />
     <Compile Include="Logs\RecognizerLogConfigurations.cs" />
-    <Compile Include="Logs\RecognizerLogFactory.cs" />
     <Compile Include="Logs\RecognizerLogger.cs" />
     <Compile Include="Logs\Log.cs" />
     <Compile Include="MainForm.cs">
@@ -206,7 +213,6 @@
     <EmbeddedResource Include="UserLists.resx">
       <DependentUpon>UserLists.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

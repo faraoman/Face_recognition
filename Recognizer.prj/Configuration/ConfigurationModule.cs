@@ -59,15 +59,6 @@ namespace Recognizer
 				.Named<IApplicationProfileDirectory>(@"configuration")
 				.SingleInstance();
 
-			//// Здесь я пытаюсь зарегистрировать папку с логами.
-			//builder.Register(
-			//	context => context
-			//		.Resolve<IApplicationProfileService>()
-			//		.LocalMachine
-			//		.RegisterDirectory(@"Logs", ApplicationProfileDirectoryUsage.Logs))
-			//	.Named<IApplicationProfileDirectory>(@"logs")
-			//	.SingleInstance();
-
 			builder.RegisterSerializableConfiguration("Core", "TestParameters", TestParameters.Serializer, TestParameters.Defaults);
 
 			builder
@@ -81,13 +72,6 @@ namespace Recognizer
 				.WithParameter(ResolvedParameter.ForNamed<IApplicationProfileDirectory>(@"configuration"))
 				.WithParameter(new NamedParameter(@"fileName", "FaceRecognizer.cfg"))
 				.SingleInstance();
-
-			//builder
-			//	.RegisterType<RootApplicationConfigurationFile>()
-			//	.As<>()
-			//	.WithParameter(ResolvedParameter.ForNamed<IApplicationProfileDirectory>(@"configuration"))
-			//	.WithParameter(new NamedParameter(@"fileName", "FaceRecognizer.cfg"))
-			//	.SingleInstance();
 		}
 	}
 }

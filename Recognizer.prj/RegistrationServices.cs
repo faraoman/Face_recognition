@@ -2,6 +2,10 @@
 using Mallenom;
 using Recognizer.Database;
 
+using Mallenom.Video;
+using Recognizer.Configuration;
+using Mallenom.AppServices;
+
 namespace Recognizer
 {
 	public static class RegistrationServices
@@ -23,6 +27,22 @@ namespace Recognizer
 				.RegisterType<DatabaseService>()
 				.SingleInstance()
 				.AsSelf();
+
+			var videoSourceProvider = new IPCameraSourceProvider();
+			var configuration = videoSourceProvider.TryGetConfiguration();
+			var videoSource = videoSourceProvider.CreateVideoSource();
+
+			containerBuilder
+				.RegisterInstance(videoSourceProvider)
+				.As<IVideoSourceProvider>();
+
+			containerBuilder
+				.RegisterInstance(new VideoSourceConfiguration(videoSource, configuration))
+				.As<ISerializableConfiguration>();
+
+			containerBuilder
+				.RegisterInstance(videoSource)
+				.As<IVideoSource>();
 
 			containerBuilder.RegisterModule<ConfigurationModule>();
 			containerBuilder.RegisterModule<DatabaseModule>();
