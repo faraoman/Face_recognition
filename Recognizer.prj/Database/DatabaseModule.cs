@@ -7,6 +7,10 @@ namespace Recognizer.Database
 		protected override void Load(ContainerBuilder builder)
 		{
 			base.Load(builder);
+
+			builder
+				.RegisterType<SqlServerConnectionFactory>()
+				.As<IDbConnectionFactory>();
 		}
 	}
 }
