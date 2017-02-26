@@ -15,9 +15,7 @@ namespace Recognizer.Database
 				.Data
 				.Entity
 				.Database
-				.SetInitializer(new RecognizerInitializer());
-
-			Database.CreateIfNotExists();
+				.SetInitializer(new RecognizerContextInitializer());
 		}
 
 		public RecognizerContext(IDbConnectionFactory connectionFactory, bool contextOwnsConnection = true)
@@ -27,9 +25,7 @@ namespace Recognizer.Database
 				.Data
 				.Entity
 				.Database
-				.SetInitializer(new RecognizerInitializer());
-
-			Database.CreateIfNotExists();
+				.SetInitializer(new RecognizerContextInitializer());
 		}
 
 		//public DbSet<Employee> Employees { get; set; }

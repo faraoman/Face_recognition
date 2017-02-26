@@ -10,7 +10,7 @@ namespace Recognizer.Logs
 		#region Static
 
 		/// <summary>Лог.</summary>
-		public static readonly ILog Log = DefaultLogger.GetLog();
+		public static readonly ILog Log = DefaultLogger.Log;
 
 		#endregion
 
@@ -67,7 +67,7 @@ namespace Recognizer.Logs
 		{
 			if(!IsDisposed)
 			{
-				Log.Info("Application shutdown.");
+				Log.Info("Application shutdown");
 
 				IsDisposed = true;
 			}

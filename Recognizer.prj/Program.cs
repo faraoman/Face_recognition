@@ -1,6 +1,7 @@
 ﻿using System;
 using Autofac;
 using Mallenom.AppServices;
+using Recognizer.Logs;
 
 namespace Recognizer
 {

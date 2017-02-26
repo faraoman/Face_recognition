@@ -23,8 +23,6 @@ namespace Recognizer.Database
 
 		public string DatabaseName { get; set; }
 
-		public static string AttachedDBFileName { get; set; }
-
 		public string Hostname { get; set; }
 
 		public AuthType AuthType { get; set; }

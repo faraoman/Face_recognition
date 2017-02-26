@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Recognizer.Database;
 using Recognizer.Entities;
@@ -22,34 +23,41 @@ namespace Recognizer
 		{
 			base.OnLoad(e);
 			MinimumSize = Size;
-
-			var employees = GetEmployeesFromDb();
-
-			string str = string.Empty;
-
-			foreach(var employee in employees)
-			{
-				str += employee.ToString() + "\n";
-			}
-
-			MessageBox.Show(this, str, "Список сотрудников", MessageBoxButtons.OK);
 		}
 
-		private List<Employee> GetEmployeesFromDb()
+		private static Task GetEmployeesAsync()
 		{
-			try
+			return Task.Run(() =>
 			{
-				var context = new RecognizerContext(Services.DatabaseService.DbConnectionFactory, contextOwnsConnection: true);
+				try
+				{
+					var dbConnectionFactory = Services.DatabaseService.DbConnectionFactory;
+					var context = new RecognizerContext(dbConnectionFactory, contextOwnsConnection: true);
 
-				return context
-					.Set<Employee>()
-					.ToList();
-			}
-			catch(Exception exc)
-			{
-				Log.Error("Database initialization error", exc);
-				return new List<Employee>();
-			}
+					var employees = context
+						.Set<Employee>()
+						.ToList();
+
+					string str = string.Empty;
+
+					foreach(var employee in employees)
+					{
+						str += employee + "\n";
+					}
+
+					MessageBox.Show(str, "Список сотрудников", MessageBoxButtons.OK);
+
+				}
+				catch(Exception exc)
+				{
+					Log.Error("Database initialization error", exc);
+				}
+			});
+		}
+
+		private async void _btnShowEmployees_Click(object sender, EventArgs e)
+		{
+			await GetEmployeesAsync();
 		}
 	}
 }

@@ -4,7 +4,7 @@ using Recognizer.Entities;
 
 namespace Recognizer.Database
 {
-	public class RecognizerInitializer : CreateDatabaseIfNotExists<RecognizerContext>
+	public class RecognizerContextInitializer : CreateDatabaseIfNotExists<RecognizerContext>
 	{
 		protected override void Seed(RecognizerContext context)
 		{
@@ -25,7 +25,7 @@ namespace Recognizer.Database
 					LastName = "Okomin",
 					PersonLabel = 3
 				}
-		};
+			};
 
 			context
 				.Set<Employee>()

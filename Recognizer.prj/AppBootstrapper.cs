@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using Mallenom.Video;
 
+using static Recognizer.Logs.LoggingService;
+
 namespace Recognizer
 {
 	public sealed class AppBootstrapper : IDisposable
@@ -24,7 +26,7 @@ namespace Recognizer
 
 		public void Dispose()
 		{
-			
+
 		}
 	}
 }
