@@ -4,53 +4,42 @@ using Mallenom.AppServices;
 
 namespace Recognizer.Logs
 {
-	public sealed class RecognizerLogger : ILog
+	public sealed class Logger : ILog
 	{
+
+		private readonly string _defaultFileName = "logs.log";
+		private string _fileName;
+
 		#region .ctor
 
-		public RecognizerLogger(IApplicationProfileDirectory directory)
+		public Logger(IApplicationProfileDirectory directory)
 		{
 			Directory = directory;
+			_fileName = _defaultFileName;
+			FullPath = Path.Combine(Directory.FullPath, _defaultFileName);
+		}
+
+		public Logger(IApplicationProfileDirectory directory, string fileName)
+		{
+			Directory = directory;
+			_fileName = fileName;
+			FullPath = Path.Combine(Directory.FullPath, fileName);
 		}
 		#endregion
 
 		#region Properties
 
 		IApplicationProfileDirectory Directory { get; set; }
+		string FullPath { get; }
+		
 		#endregion
 
 		#region Methods
 
-		private void LogFileBuilder()
-		{
-			if (!File.Exists(Configuration.FilePath))
-			{
-				File
-					.Create(Configuration.FilePath)
-					.Close();
-			}
-			
-			if(Configuration.FileInfo.Length > Configuration.FileSize)
-			{
-				string newFile = $@"{Configuration.Directory}\{DateTime.Now.ToString("ddMMyyHHmmss")}.old";
-
-				if(File.Exists(newFile))
-				{
-					File.Delete(newFile);
-				}
-				else
-				{
-					File.Move(Configuration.FilePath, newFile);
-					File.SetCreationTime(newFile, DateTime.Now);
-				}
-			}
-		}
-
 		public void Info(string message)
 		{
-			LogFileBuilder();
 			DateTime now = DateTime.Now;
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][INFO: \"{message}\".]");
 			}
@@ -58,9 +47,8 @@ namespace Recognizer.Logs
 
 		public void Info(string message, Exception exception)
 		{
-			LogFileBuilder();
 			DateTime now = DateTime.Now;
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][INFO \"{message}\".][Description: \"{exception.Message}\" in method \"{exception.TargetSite}\".]");
 			}
@@ -68,9 +56,8 @@ namespace Recognizer.Logs
 
 		public void Error(string message)
 		{
-			LogFileBuilder();
 			DateTime now = DateTime.Now;
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][ERROR: \"{message}\".]");
 			}
@@ -78,9 +65,8 @@ namespace Recognizer.Logs
 
 		public void Error(string message, Exception exception)
 		{
-			LogFileBuilder();
 			DateTime now = DateTime.Now;
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][ERROR: \"{message}\".][Description: \"{exception.Message}\" in method \"{exception.TargetSite}\".]");
 			}
@@ -88,9 +74,8 @@ namespace Recognizer.Logs
 
 		public void Warning(string message)
 		{
-			LogFileBuilder();
 			DateTime now = DateTime.Now;
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][WARNING: \"{message}\".]");
 			}
@@ -98,9 +83,8 @@ namespace Recognizer.Logs
 
 		public void Warning(string message, Exception exception)
 		{
-			LogFileBuilder();
 			DateTime now = DateTime.Now;
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][WARNING: \"{message}\".][Description: \"{exception.Message}\" in method \"{exception.TargetSite}\".]");
 			}
@@ -108,9 +92,8 @@ namespace Recognizer.Logs
 
 		public void Fatal(string message)
 		{
-			LogFileBuilder();
 			DateTime now = DateTime.Now;
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][FATAL: \"{message}\".]");
 			}
@@ -118,7 +101,7 @@ namespace Recognizer.Logs
 
 		public void Fatal(string message, Exception exception)
 		{
-			using(StreamWriter sw = File.AppendText(Configuration.FilePath))
+			using(StreamWriter sw = File.AppendText(FullPath))
 			{
 				sw.WriteLine($"[Time: {DateTime.Now}][FATAL: \"{message}\".][Description: \"{exception.Message}\" in method \"{exception.TargetSite}\".]");
 			}

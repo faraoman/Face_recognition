@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,11 @@ namespace Recognizer.Database
 
 		public string DatabaseName { get; set; }
 
+		public static string AttachedDBFileName { get; set; }
+
 		public string Hostname { get; set; }
+
+		public AuthType AuthType { get; set; }
 
 		public string Username { get; set; }
 
@@ -38,6 +43,7 @@ namespace Recognizer.Database
 
 			sb.InitialCatalog = DatabaseName;
 			sb.DataSource = Hostname;
+			sb.IntegratedSecurity = AuthType == AuthType.Windows;
 			sb.UserID = Username;
 			sb.Password = Password;
 
@@ -56,33 +62,28 @@ namespace Recognizer.Database
 			Password = Defaults.Password;
 		}
 
-		public void Save()
-		{
-
-		}
-
-		public void Load()
-		{
-
-		}
-
 		#endregion
 
 		#region Defaults
 
 		public static class Defaults
 		{
-			public const string DatabaseName = "Emloyees";
+			public const string DatabaseName = "FaceRecognizer";
 
-			public const string Hostname = @"localhost\SQLServer";
+			public const string Hostname = @"(localdb)\mssqllocaldb";
 
-			//public static readonly AuthType AuthType = AuthType.Windows;
+			public static readonly AuthType AuthType = AuthType.Windows;
 
 			public const string Username = "";
 
 			public const string Password = "";
 		}
-
 		#endregion
+	}
+
+	public enum AuthType : int
+	{
+		Windows = 0,
+		Server = 1
 	}
 }

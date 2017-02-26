@@ -1,18 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity.Infrastructure.Annotations;
 using System.Data.Entity.ModelConfiguration;
+using System.Runtime.Serialization;
 
 namespace Recognizer.Entities
 {
-	public sealed class Employees
+	public sealed class Employee
 	{
 		#region Configuration
 
-		private sealed class EmployeesConfiguration : EntityTypeConfiguration<Employees>
+		private sealed class EmployeesConfiguration : EntityTypeConfiguration<Employee>
 		{
 			public EmployeesConfiguration()
 			{
 				ToTable("Employees");
+
+				HasKey(e => e.Id);
 
 				Property(e => e.Id)
 					.IsRequired()
@@ -21,26 +24,30 @@ namespace Recognizer.Entities
 				Property(e => e.FirstName)
 					.IsRequired()
 					.IsUnicode()
+					.HasColumnName("Имя")
 					.HasMaxLength(30);
 
 				Property(e => e.LastName)
 					.IsRequired()
 					.IsUnicode()
+					.HasColumnName("Фамилия")
 					.HasMaxLength(30);
 
 				Property(e => e.Patronymic)
 					.IsRequired()
 					.IsUnicode()
+					.HasColumnName("Отчество")
 					.HasMaxLength(30);
 
 				Property(e => e.PersonLabel)
 					.IsRequired()
+					.HasColumnName("Метка")
 					.HasColumnAnnotation(IndexAnnotation.AnnotationName, new IndexAnnotation(new IndexAttribute("IX_DatabasePlateIndex", 1) { IsUnique = true }));
 
 			}
 		}
 
-		public static EntityTypeConfiguration<Employees> CreateConfiguration() => new EmployeesConfiguration();
+		public static EntityTypeConfiguration<Employee> CreateConfiguration() => new EmployeesConfiguration();
 
 		#endregion
 
@@ -48,19 +55,19 @@ namespace Recognizer.Entities
 
 		public long Id { get; set; }
 
-		[Column("Имя")]
 		public string FirstName { get; set; }
 
-		[Column("Фамилия")]
 		public string LastName { get; set; }
 
-		[Column("Отчество")]
 		public string Patronymic { get; set; }
 
-		[Column("Метка")]
 		public long PersonLabel { get; set; }
 
 		#endregion
 
+		public override string ToString()
+		{
+			return $"Id: {Id}, Фамилия: {LastName}, Имя: {FirstName}, Отчество: {Patronymic}, Метка: {PersonLabel}.";
+		}
 	}
 }

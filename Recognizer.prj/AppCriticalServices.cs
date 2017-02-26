@@ -9,19 +9,17 @@ namespace Recognizer
 	{
 		private readonly IApplicationProfileService _applicationProfileService;
 		private readonly IApplicationProfileDirectory _logsDirectory;
+		private readonly IApplicationProfileDirectory _dbDirectory;
 
-		private readonly RecognizerLogger _logger;
+		private readonly LoggingService _logService;
 
 		public AppCriticalServices()
 		{
-			_applicationProfileService = new ApplicationProfileService("Mallenom", "FaceRecognizer");
-			_logsDirectory = _applicationProfileService
-				.LocalMachine
-				.RegisterDirectory(@"Logs", ApplicationProfileDirectoryUsage.Logs);
+			_applicationProfileService = Services.ApplicationProfileService;
+			_logsDirectory = DefaultLogger.LogDirectory;
+			_dbDirectory = Services.DatabaseDirectory;
 
-			_logsDirectory.EnsureExists();
-
-			var logger = new RecognizerLogger(_logsDirectory);
+			_logService = new LoggingService(_logsDirectory);
 		}
 
 		public void Register(ContainerBuilder builder)
@@ -34,12 +32,17 @@ namespace Recognizer
 				.SingleInstance();
 
 			builder
-				.RegisterInstance(_logger)
+				.RegisterInstance(_logService)
 				.AsSelf();
 
 			builder
 				.RegisterInstance(_logsDirectory)
 				.Named<IApplicationProfileDirectory>("logs")
+				.ExternallyOwned();
+
+			builder
+				.RegisterInstance(_dbDirectory)
+				.Named<IApplicationProfileDirectory>("database")
 				.ExternallyOwned();
 		}
 	}

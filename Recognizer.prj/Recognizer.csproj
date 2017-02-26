@@ -153,23 +153,22 @@
     <Compile Include="AppCriticalServices.cs" />
     <Compile Include="Configuration\ConfigurationModule.cs" />
     <Compile Include="Configuration\VideoSourceConfiguration.cs" />
-    <Compile Include="Database\DatabaseModule.cs" />
-    <Compile Include="Database\DatabaseService.cs" />
-    <Compile Include="Database\FaceRecognizerContext.cs" />
-    <Compile Include="Database\IConnectionStringProvider.cs" />
-    <Compile Include="Database\IDbConnectionFactory.cs" />
-    <Compile Include="Database\SqlServerConnectionConfiguration.cs" />
-    <Compile Include="Database\SqlServerConnectionFactory.cs" />
+    <Compile Include="Database\Data\RecognizerInitializer.cs" />
+    <Compile Include="Database\Container\DatabaseModule.cs" />
+    <Compile Include="Database\Container\DatabaseService.cs" />
+    <Compile Include="Database\Data\RecognizerContext.cs" />
+    <Compile Include="Database\Connection\IConnectionStringProvider.cs" />
+    <Compile Include="Database\Connection\IDbConnectionFactory.cs" />
+    <Compile Include="Database\Connection\SqlServerConnectionConfiguration.cs" />
+    <Compile Include="Database\Connection\SqlServerConnectionFactory.cs" />
     <Compile Include="Detector\FaceDetector.cs" />
     <Compile Include="Detector\MatExtensions.cs" />
-    <Compile Include="Entities\Employees.cs" />
+    <Compile Include="Entities\Employee.cs" />
     <Compile Include="Logs\ILog.cs" />
-    <Compile Include="Logs\ILogConfiguration.cs" />
     <Compile Include="Logs\ILoggingService.cs" />
     <Compile Include="Logs\LoggingService.cs" />
-    <Compile Include="Logs\RecognizerLogConfigurations.cs" />
-    <Compile Include="Logs\RecognizerLogger.cs" />
-    <Compile Include="Logs\Log.cs" />
+    <Compile Include="Logs\Logger.cs" />
+    <Compile Include="Logs\DefaultLogger.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -180,6 +179,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Recognition\LBPFaceRecognizer.cs" />
     <Compile Include="RegistrationServices.cs" />
+    <Compile Include="Services.cs" />
     <Compile Include="TestForm.cs">
       <SubType>Form</SubType>
     </Compile>

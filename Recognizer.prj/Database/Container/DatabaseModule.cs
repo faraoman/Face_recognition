@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System.Data.Entity;
+using Autofac;
 
 namespace Recognizer.Database
 {
@@ -11,6 +12,14 @@ namespace Recognizer.Database
 			builder
 				.RegisterType<SqlServerConnectionFactory>()
 				.As<IDbConnectionFactory>();
+
+			builder
+				.RegisterType<RecognizerContext>()
+				.As<DbContext>();
+
+			builder
+				.RegisterType<SqlServerConnectionConfiguration>()
+				.As<IConnectionStringProvider>();
 		}
 	}
 }

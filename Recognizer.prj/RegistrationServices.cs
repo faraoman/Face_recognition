@@ -5,6 +5,7 @@ using Recognizer.Database;
 using Mallenom.Video;
 using Recognizer.Configuration;
 using Mallenom.AppServices;
+using Recognizer.Logs;
 
 namespace Recognizer
 {
@@ -25,6 +26,11 @@ namespace Recognizer
 
 			containerBuilder
 				.RegisterType<DatabaseService>()
+				.SingleInstance()
+				.AsSelf();
+
+			containerBuilder
+				.RegisterType<LoggingService>()
 				.SingleInstance()
 				.AsSelf();
 

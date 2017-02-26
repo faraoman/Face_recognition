@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
-using Recognizer.Logs;
+using Recognizer.Database;
+using Recognizer.Entities;
+using static Recognizer.Logs.LoggingService;
 
 namespace Recognizer
 {
@@ -13,22 +16,42 @@ namespace Recognizer
 
 		private void _btnLoadImage_Click(object sender, EventArgs e)
 		{
-			OpenFileDialog openFile = new OpenFileDialog();
-			openFile.Title = "Выберите картинку";
-			openFile.FileName = "*.jpg";
-			if(openFile.ShowDialog() == DialogResult.OK)
-			{
-				try
-				{
-					int i = 1;
-					int a = 2 / --i;
-				}
-				catch(Exception exc)
-				{
-					Log.Error($"Не удалось открыть изображение {openFile.FileName}", exc);
-				}
-			}
+			var dbService = Services.DatabaseService;
 
+			//Employee employee = new Employee
+			//{
+			//	FirstName = "Pavel",
+			//	Patronymic = "Ivanovich",
+			//	LastName = "Shevelev",
+			//	PersonLabel = 1
+			//};
+
+			Employee employee = new Employee
+			{
+				FirstName = "Andrey",
+				Patronymic = "Alekseevich",
+				LastName = "Okomin",
+				PersonLabel = 3
+			};
+
+			try
+			{
+				var context = new RecognizerContext();
+
+				var employees = context
+					.Set<Employee>()
+					.ToList();
+
+				context
+					.Set<Employee>()
+					.RemoveRange(employees);
+
+				context.SaveChanges();
+			}
+			catch(Exception exc)
+			{
+				Log.Error("Database initialization error", exc);
+			}
 		}
 	}
 }
