@@ -34,8 +34,12 @@ namespace Recognizer
 					var dbConnectionFactory = Services.DatabaseService.DbConnectionFactory;
 					var context = new RecognizerContext(dbConnectionFactory, contextOwnsConnection: true);
 
+					//context
+					//.Database
+					//.CreateIfNotExists();
+
 					var employees = context
-						.Set<Employee>()
+						.Employees
 						.ToList();
 
 					string str = string.Empty;
@@ -44,7 +48,7 @@ namespace Recognizer
 					{
 						str += employee + "\n";
 					}
-
+					
 					MessageBox.Show(str, "Список сотрудников", MessageBoxButtons.OK);
 
 				}

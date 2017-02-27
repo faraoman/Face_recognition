@@ -28,7 +28,7 @@ namespace Recognizer.Database
 			};
 
 			context
-				.Set<Employee>()
+				.Employees
 				.AddRange(employees);
 
 			context.SaveChanges();
