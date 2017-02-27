@@ -12,18 +12,26 @@ namespace Recognizer.Database
 			{
 				new Employee
 				{
-					FirstName = "Pavel",
-					Patronymic = "Ivanovich",
-					LastName = "Shevelev",
+					FirstName = "Павел",
+					Patronymic = "Иванович",
+					LastName = "Шевелев",
 					PersonLabel = 1
 				},
 
 				new Employee
 				{
-					FirstName = "Andrey",
-					Patronymic = "Alekseevich",
-					LastName = "Okomin",
+					FirstName = "Андрей",
+					Patronymic = "Алексеевич",
+					LastName = "Окомин",
 					PersonLabel = 3
+				},
+
+				new Employee
+				{
+					FirstName = "Матвей",
+					Patronymic = "Иванович",
+					LastName = "Чевычелов",
+					PersonLabel = 4
 				}
 			};
 

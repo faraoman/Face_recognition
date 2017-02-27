@@ -78,6 +78,9 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="mallenom.ffmpeg">
+      <HintPath>..\Libs\mallenom.ffmpeg.dll</HintPath>
+    </Reference>
     <Reference Include="mallenom.framework, Version=2.6.15.198, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\mallenom.framework.dll</HintPath>
@@ -92,6 +95,9 @@
     <Reference Include="mallenom.video, Version=4.6.5.235, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\mallenom.video.dll</HintPath>
+    </Reference>
+    <Reference Include="mallenom.video.ffmpeg">
+      <HintPath>..\Libs\mallenom.video.ffmpeg.dll</HintPath>
     </Reference>
     <Reference Include="mallenom.video.ipcam, Version=1.7.9.153, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -153,6 +159,7 @@
     <Compile Include="AppCriticalServices.cs" />
     <Compile Include="Configuration\ConfigurationModule.cs" />
     <Compile Include="Configuration\VideoSourceConfiguration.cs" />
+    <Compile Include="Database\EmployeesLogRepository.cs" />
     <Compile Include="Database\Data\RecognizerContextInitializer.cs" />
     <Compile Include="Database\Container\DatabaseModule.cs" />
     <Compile Include="Database\Container\DatabaseService.cs" />
@@ -161,6 +168,7 @@
     <Compile Include="Database\Connection\IDbConnectionFactory.cs" />
     <Compile Include="Database\Connection\SqlServerConnectionConfiguration.cs" />
     <Compile Include="Database\Connection\SqlServerConnectionFactory.cs" />
+    <Compile Include="Detector\ColorMatrixExtensions.cs" />
     <Compile Include="Detector\FaceDetector.cs" />
     <Compile Include="Detector\MatExtensions.cs" />
     <Compile Include="Entities\Employee.cs" />

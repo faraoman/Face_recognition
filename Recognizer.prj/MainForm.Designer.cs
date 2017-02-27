@@ -30,7 +30,7 @@
 		{
 			this._btnTestOpenCV = new System.Windows.Forms.Button();
 			this._btnTestCamera = new System.Windows.Forms.Button();
-			this.logView1 = new Mallenom.Diagnostics.Logs.LogView();
+			this._logView = new Mallenom.Diagnostics.Logs.LogView();
 			this._videoImage = new Mallenom.Imaging.VideoImage();
 			this._btnTestBtn = new System.Windows.Forms.Button();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -40,8 +40,8 @@
 			this.выходToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.базаДанныхToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.спискиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.label1 = new System.Windows.Forms.Label();
-			this.listView1 = new System.Windows.Forms.ListView();
+			this._lblExecutingProtocol = new System.Windows.Forms.Label();
+			this._listView = new System.Windows.Forms.ListView();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -65,13 +65,13 @@
 			this._btnTestCamera.UseVisualStyleBackColor = true;
 			this._btnTestCamera.Click += new System.EventHandler(this.OnButtonTestCamera_Click);
 			// 
-			// logView1
+			// _logView
 			// 
-			this.logView1.AppenderName = "root";
-			this.logView1.Location = new System.Drawing.Point(2, 549);
-			this.logView1.Name = "logView1";
-			this.logView1.Size = new System.Drawing.Size(739, 155);
-			this.logView1.TabIndex = 3;
+			this._logView.AppenderName = "root";
+			this._logView.Location = new System.Drawing.Point(2, 549);
+			this._logView.Name = "_logView";
+			this._logView.Size = new System.Drawing.Size(739, 155);
+			this._logView.TabIndex = 3;
 			// 
 			// _videoImage
 			// 
@@ -94,11 +94,9 @@
 			// 
 			// menuStrip1
 			// 
-
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
 			this.сервисToolStripMenuItem,
 			this.базаДанныхToolStripMenuItem});
-
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
 			this.menuStrip1.Size = new System.Drawing.Size(747, 24);
@@ -116,16 +114,6 @@
 			this.сервисToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
 			this.сервисToolStripMenuItem.Text = "Сервис";
 			// 
-
-			// базаДанныхToolStripMenuItem
-			// 
-			this.базаДанныхToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.спискиToolStripMenuItem});
-			this.базаДанныхToolStripMenuItem.Name = "базаДанныхToolStripMenuItem";
-			this.базаДанныхToolStripMenuItem.Size = new System.Drawing.Size(86, 20);
-			this.базаДанныхToolStripMenuItem.Text = "База данных";
-			// 
-
 			// настройкиToolStripMenuItem
 			// 
 			this.настройкиToolStripMenuItem.Name = "настройкиToolStripMenuItem";
@@ -164,22 +152,22 @@
 			this.спискиToolStripMenuItem.Text = "Списки";
 			this.спискиToolStripMenuItem.Click += new System.EventHandler(this.спискиToolStripMenuItem_Click);
 			// 
-			// label1
+			// _lblExecutingProtocol
 			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(3, 532);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(161, 13);
-			this.label1.TabIndex = 7;
-			this.label1.Text = "Протокол работы программы:";
+			this._lblExecutingProtocol.AutoSize = true;
+			this._lblExecutingProtocol.Location = new System.Drawing.Point(3, 532);
+			this._lblExecutingProtocol.Name = "_lblExecutingProtocol";
+			this._lblExecutingProtocol.Size = new System.Drawing.Size(161, 13);
+			this._lblExecutingProtocol.TabIndex = 7;
+			this._lblExecutingProtocol.Text = "Протокол работы программы:";
 			// 
-			// listView1
+			// _listView
 			// 
-			this.listView1.Location = new System.Drawing.Point(506, 27);
-			this.listView1.Name = "listView1";
-			this.listView1.Size = new System.Drawing.Size(235, 407);
-			this.listView1.TabIndex = 8;
-			this.listView1.UseCompatibleStateImageBehavior = false;
+			this._listView.Location = new System.Drawing.Point(506, 27);
+			this._listView.Name = "_listView";
+			this._listView.Size = new System.Drawing.Size(235, 407);
+			this._listView.TabIndex = 8;
+			this._listView.UseCompatibleStateImageBehavior = false;
 			// 
 			// MainForm
 			// 
@@ -187,11 +175,11 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Control;
 			this.ClientSize = new System.Drawing.Size(747, 707);
-			this.Controls.Add(this.listView1);
-			this.Controls.Add(this.label1);
+			this.Controls.Add(this._listView);
+			this.Controls.Add(this._lblExecutingProtocol);
 			this.Controls.Add(this._btnTestBtn);
 			this.Controls.Add(this._videoImage);
-			this.Controls.Add(this.logView1);
+			this.Controls.Add(this._logView);
 			this.Controls.Add(this._btnTestCamera);
 			this.Controls.Add(this._btnTestOpenCV);
 			this.Controls.Add(this.menuStrip1);
@@ -210,7 +198,7 @@
 
 		private System.Windows.Forms.Button _btnTestOpenCV;
 		private System.Windows.Forms.Button _btnTestCamera;
-		private Mallenom.Diagnostics.Logs.LogView logView1;
+		private Mallenom.Diagnostics.Logs.LogView _logView;
 		private Mallenom.Imaging.VideoImage _videoImage;
 		private System.Windows.Forms.Button _btnTestBtn;
 		private System.Windows.Forms.MenuStrip menuStrip1;
@@ -219,8 +207,8 @@
 		private System.Windows.Forms.ToolStripMenuItem выходToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem базаДанныхToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem спискиToolStripMenuItem;
-		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label _lblExecutingProtocol;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-		public System.Windows.Forms.ListView listView1;
+		public System.Windows.Forms.ListView _listView;
 	}
 }

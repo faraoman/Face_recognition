@@ -107,16 +107,6 @@ namespace Recognizer.Detector
 			FacesRepository = new List<Mat>();
 		}
 
-		private static Mat ToMat(ColorMatrix colorMatrix)
-		{
-			var result = new Mat(new Size(colorMatrix.Width, colorMatrix.Height), MatType.CV_8UC3);
-			using(var matrixData = colorMatrix.LockData())
-			{
-				Native.Kernel32.CopyMemory(matrixData.Scan0, result.Data, matrixData.Stride * matrixData.Height);
-			}
-			return result;
-		}
-
 		#endregion
 
 		#region Properties
