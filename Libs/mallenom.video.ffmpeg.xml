@@ -1,0 +1,1777 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>mallenom.video.ffmpeg</name>
+    </assembly>
+    <members>
+        <member name="T:Mallenom.CanBeNullAttribute">
+            <summary>
+            Indicates that the value of the marked element could be <c>null</c> sometimes,
+            so the check for <c>null</c> is necessary before its usage
+            </summary>
+            <example><code>
+            [CanBeNull] public object Test() { return null; }
+            public void UseTest() {
+              var p = Test();
+              var s = p.ToString(); // Warning: Possible 'System.NullReferenceException'
+            }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.NotNullAttribute">
+            <summary>
+            Indicates that the value of the marked element could never be <c>null</c>
+            </summary>
+            <example><code>
+            [NotNull] public object Foo() {
+              return null; // Warning: Possible 'null' assignment
+            }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.ItemNotNullAttribute">
+            <summary>
+            Indicates that collection or enumerable value does not contain null elements
+            </summary>
+        </member>
+        <member name="T:Mallenom.ItemCanBeNullAttribute">
+            <summary>
+            Indicates that collection or enumerable value can contain null elements
+            </summary>
+        </member>
+        <member name="T:Mallenom.StringFormatMethodAttribute">
+            <summary>
+            Indicates that the marked method builds string by format pattern and (optional) arguments.
+            Parameter, which contains format string, should be given in constructor. The format string
+            should be in <see cref="M:System.String.Format(System.IFormatProvider,System.String,System.Object[])"/>-like form
+            </summary>
+            <example><code>
+            [StringFormatMethod("message")]
+            public void ShowError(string message, params object[] args) { /* do something */ }
+            public void Foo() {
+              ShowError("Failed: {0}"); // Warning: Non-existing argument in format string
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.StringFormatMethodAttribute.#ctor(System.String)">
+            <param name="formatParameterName">
+            Specifies which parameter of an annotated method should be treated as format-string
+            </param>
+        </member>
+        <member name="T:Mallenom.ValueProviderAttribute">
+            <summary>
+            For a parameter that is expected to be one of the limited set of values.
+            Specify fields of which type should be used as values for this parameter.
+            </summary>
+        </member>
+        <member name="T:Mallenom.InvokerParameterNameAttribute">
+            <summary>
+            Indicates that the function argument should be string literal and match one
+            of the parameters of the caller function. For example, ReSharper annotates
+            the parameter of <see cref="T:System.ArgumentNullException"/>
+            </summary>
+            <example><code>
+            public void Foo(string param) {
+              if (param == null)
+                throw new ArgumentNullException("par"); // Warning: Cannot resolve symbol
+            }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.NotifyPropertyChangedInvocatorAttribute">
+             <summary>
+             Indicates that the method is contained in a type that implements
+             <c>System.ComponentModel.INotifyPropertyChanged</c> interface and this method
+             is used to notify that some property value changed
+             </summary>
+             <remarks>
+             The method should be non-static and conform to one of the supported signatures:
+             <list>
+             <item><c>NotifyChanged(string)</c></item>
+             <item><c>NotifyChanged(params string[])</c></item>
+             <item><c>NotifyChanged{T}(Expression{Func{T}})</c></item>
+             <item><c>NotifyChanged{T,U}(Expression{Func{T,U}})</c></item>
+             <item><c>SetProperty{T}(ref T, T, string)</c></item>
+             </list>
+             </remarks>
+             <example><code>
+             public class Foo : INotifyPropertyChanged {
+               public event PropertyChangedEventHandler PropertyChanged;
+               [NotifyPropertyChangedInvocator]
+               protected virtual void NotifyChanged(string propertyName) { ... }
+            
+               private string _name;
+               public string Name {
+                 get { return _name; }
+                 set { _name = value; NotifyChanged("LastName"); /* Warning */ }
+               }
+             }
+             </code>
+             Examples of generated notifications:
+             <list>
+             <item><c>NotifyChanged("Property")</c></item>
+             <item><c>NotifyChanged(() =&gt; Property)</c></item>
+             <item><c>NotifyChanged((VM x) =&gt; x.Property)</c></item>
+             <item><c>SetProperty(ref myField, value, "Property")</c></item>
+             </list>
+             </example>
+        </member>
+        <member name="T:Mallenom.ContractAnnotationAttribute">
+            <summary>
+            Describes dependency between method input and output
+            </summary>
+            <syntax>
+            <p>Function Definition Table syntax:</p>
+            <list>
+            <item>FDT      ::= FDTRow [;FDTRow]*</item>
+            <item>FDTRow   ::= Input =&gt; Output | Output &lt;= Input</item>
+            <item>Input    ::= ParameterName: Value [, Input]*</item>
+            <item>Output   ::= [ParameterName: Value]* {halt|stop|void|nothing|Value}</item>
+            <item>Value    ::= true | false | null | notnull | canbenull</item>
+            </list>
+            If method has single input parameter, it's name could be omitted.<br/>
+            Using <c>halt</c> (or <c>void</c>/<c>nothing</c>, which is the same)
+            for method output means that the methos doesn't return normally.<br/>
+            <c>canbenull</c> annotation is only applicable for output parameters.<br/>
+            You can use multiple <c>[ContractAnnotation]</c> for each FDT row,
+            or use single attribute with rows separated by semicolon.<br/>
+            </syntax>
+            <examples><list>
+            <item><code>
+            [ContractAnnotation("=> halt")]
+            public void TerminationMethod()
+            </code></item>
+            <item><code>
+            [ContractAnnotation("halt &lt;= condition: false")]
+            public void Assert(bool condition, string text) // regular assertion method
+            </code></item>
+            <item><code>
+            [ContractAnnotation("s:null => true")]
+            public bool IsNullOrEmpty(string s) // string.IsNullOrEmpty()
+            </code></item>
+            <item><code>
+            // A method that returns null if the parameter is null,
+            // and not null if the parameter is not null
+            [ContractAnnotation("null => null; notnull => notnull")]
+            public object Transform(object data) 
+            </code></item>
+            <item><code>
+            [ContractAnnotation("s:null=>false; =>true,result:notnull; =>false, result:null")]
+            public bool TryParse(string s, out Person result)
+            </code></item>
+            </list></examples>
+        </member>
+        <member name="T:Mallenom.LocalizationRequiredAttribute">
+            <summary>
+            Indicates that marked element should be localized or not
+            </summary>
+            <example><code>
+            [LocalizationRequiredAttribute(true)]
+            public class Foo {
+              private string str = "my string"; // Warning: Localizable string
+            }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.CannotApplyEqualityOperatorAttribute">
+            <summary>
+            Indicates that the value of the marked type (or its derivatives)
+            cannot be compared using '==' or '!=' operators and <c>Equals()</c>
+            should be used instead. However, using '==' or '!=' for comparison
+            with <c>null</c> is always permitted.
+            </summary>
+            <example><code>
+            [CannotApplyEqualityOperator]
+            class NoEquality { }
+            class UsesNoEquality {
+              public void Test() {
+                var ca1 = new NoEquality();
+                var ca2 = new NoEquality();
+                if (ca1 != null) { // OK
+                  bool condition = ca1 == ca2; // Warning
+                }
+              }
+            }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.BaseTypeRequiredAttribute">
+            <summary>
+            When applied to a target attribute, specifies a requirement for any type marked
+            with the target attribute to implement or inherit specific type or types.
+            </summary>
+            <example><code>
+            [BaseTypeRequired(typeof(IComponent)] // Specify requirement
+            public class ComponentAttribute : Attribute { }
+            [Component] // ComponentAttribute requires implementing IComponent interface
+            public class MyComponent : IComponent { }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.UsedImplicitlyAttribute">
+            <summary>
+            Indicates that the marked symbol is used implicitly
+            (e.g. via reflection, in external library), so this symbol
+            will not be marked as unused (as well as by other usage inspections)
+            </summary>
+        </member>
+        <member name="T:Mallenom.MeansImplicitUseAttribute">
+            <summary>
+            Should be used on attributes and causes ReSharper
+            to not mark symbols marked with such attributes as unused
+            (as well as by other usage inspections)
+            </summary>
+        </member>
+        <member name="F:Mallenom.ImplicitUseKindFlags.Access">
+            <summary>Only entity marked with attribute considered used</summary>
+        </member>
+        <member name="F:Mallenom.ImplicitUseKindFlags.Assign">
+            <summary>Indicates implicit assignment to a member</summary>
+        </member>
+        <member name="F:Mallenom.ImplicitUseKindFlags.InstantiatedWithFixedConstructorSignature">
+            <summary>
+            Indicates implicit instantiation of a type with fixed constructor signature.
+            That means any unused constructor parameters won't be reported as such.
+            </summary>
+        </member>
+        <member name="F:Mallenom.ImplicitUseKindFlags.InstantiatedNoFixedConstructorSignature">
+            <summary>Indicates implicit instantiation of a type</summary>
+        </member>
+        <member name="T:Mallenom.ImplicitUseTargetFlags">
+            <summary>
+            Specify what is considered used implicitly when marked
+            with <see cref="T:Mallenom.MeansImplicitUseAttribute"/> or <see cref="T:Mallenom.UsedImplicitlyAttribute"/>
+            </summary>
+        </member>
+        <member name="F:Mallenom.ImplicitUseTargetFlags.Members">
+            <summary>Members of entity marked with attribute are considered used</summary>
+        </member>
+        <member name="F:Mallenom.ImplicitUseTargetFlags.WithMembers">
+            <summary>Entity marked with attribute and all its members considered used</summary>
+        </member>
+        <member name="T:Mallenom.PublicAPIAttribute">
+            <summary>
+            This attribute is intended to mark publicly available API
+            which should not be removed and so is treated as used
+            </summary>
+        </member>
+        <member name="T:Mallenom.InstantHandleAttribute">
+            <summary>
+            Tells code analysis engine if the parameter is completely handled
+            when the invoked method is on stack. If the parameter is a delegate,
+            indicates that delegate is executed while the method is executed.
+            If the parameter is an enumerable, indicates that it is enumerated
+            while the method is executed
+            </summary>
+        </member>
+        <member name="T:Mallenom.PureAttribute">
+            <summary>
+            Indicates that a method does not make any observable state changes.
+            The same as <c>System.Diagnostics.Contracts.PureAttribute</c>
+            </summary>
+            <example><code>
+            [Pure] private int Multiply(int x, int y) { return x * y; }
+            public void Foo() {
+              const int a = 2, b = 2;
+              Multiply(a, b); // Waring: Return value of pure method is not used
+            }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.PathReferenceAttribute">
+            <summary>
+            Indicates that a parameter is a path to a file or a folder within a web project.
+            Path can be relative or absolute, starting from web root (~)
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcActionAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that the parameter
+            is an MVC action. If applied to a method, the MVC action name is calculated
+            implicitly from the context. Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.ChildActionExtensions.RenderAction(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcAreaAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC area.
+            Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.ChildActionExtensions.RenderAction(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcControllerAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that the parameter is
+            an MVC controller. If applied to a method, the MVC controller name is calculated
+            implicitly from the context. Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.ChildActionExtensions.RenderAction(HtmlHelper, String, String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcMasterAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC Master. Use this attribute
+            for custom wrappers similar to <c>System.Web.Mvc.Controller.View(String, String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcModelTypeAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC model type. Use this attribute
+            for custom wrappers similar to <c>System.Web.Mvc.Controller.View(String, Object)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcPartialViewAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that the parameter is an MVC
+            partial view. If applied to a method, the MVC partial view name is calculated implicitly
+            from the context. Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.RenderPartialExtensions.RenderPartial(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcSupressViewErrorAttribute">
+            <summary>
+            ASP.NET MVC attribute. Allows disabling inspections for MVC views within a class or a method
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcDisplayTemplateAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC display template.
+            Use this attribute for custom wrappers similar to 
+            <c>System.Web.Mvc.Html.DisplayExtensions.DisplayForModel(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcEditorTemplateAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC editor template.
+            Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Html.EditorExtensions.EditorForModel(HtmlHelper, String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcTemplateAttribute">
+            <summary>
+            ASP.NET MVC attribute. Indicates that a parameter is an MVC template.
+            Use this attribute for custom wrappers similar to
+            <c>System.ComponentModel.DataAnnotations.UIHintAttribute(System.String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcViewAttribute">
+            <summary>
+            ASP.NET MVC attribute. If applied to a parameter, indicates that the parameter
+            is an MVC view. If applied to a method, the MVC view name is calculated implicitly
+            from the context. Use this attribute for custom wrappers similar to
+            <c>System.Web.Mvc.Controller.View(Object)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.AspMvcActionSelectorAttribute">
+            <summary>
+            ASP.NET MVC attribute. When applied to a parameter of an attribute,
+            indicates that this parameter is an MVC action name
+            </summary>
+            <example><code>
+            [ActionName("Foo")]
+            public ActionResult Login(string returnUrl) {
+              ViewBag.ReturnUrl = Url.Action("Foo"); // OK
+              return RedirectToAction("Bar"); // Error: Cannot resolve action
+            }
+            </code></example>
+        </member>
+        <member name="T:Mallenom.RazorSectionAttribute">
+            <summary>
+            Razor attribute. Indicates that a parameter or a method is a Razor section.
+            Use this attribute for custom wrappers similar to 
+            <c>System.Web.WebPages.WebPageBase.RenderSection(String)</c>
+            </summary>
+        </member>
+        <member name="T:Mallenom.CollectionAccessAttribute">
+            <summary>
+            Indicates how method invocation affects content of the collection
+            </summary>
+        </member>
+        <member name="F:Mallenom.CollectionAccessType.None">
+            <summary>Method does not use or modify content of the collection</summary>
+        </member>
+        <member name="F:Mallenom.CollectionAccessType.Read">
+            <summary>Method only reads content of the collection but does not modify it</summary>
+        </member>
+        <member name="F:Mallenom.CollectionAccessType.ModifyExistingContent">
+            <summary>Method can change content of the collection but does not add new elements</summary>
+        </member>
+        <member name="F:Mallenom.CollectionAccessType.UpdatedContent">
+            <summary>Method can add new elements to the collection</summary>
+        </member>
+        <member name="T:Mallenom.AssertionMethodAttribute">
+            <summary>
+            Indicates that the marked method is assertion method, i.e. it halts control flow if
+            one of the conditions is satisfied. To set the condition, mark one of the parameters with 
+            <see cref="T:Mallenom.AssertionConditionAttribute"/> attribute
+            </summary>
+        </member>
+        <member name="T:Mallenom.AssertionConditionAttribute">
+            <summary>
+            Indicates the condition parameter of the assertion method. The method itself should be
+            marked by <see cref="T:Mallenom.AssertionMethodAttribute"/> attribute. The mandatory argument of
+            the attribute is the assertion type.
+            </summary>
+        </member>
+        <member name="T:Mallenom.AssertionConditionType">
+            <summary>
+            Specifies assertion type. If the assertion method argument satisfies the condition,
+            then the execution continues. Otherwise, execution is assumed to be halted
+            </summary>
+        </member>
+        <member name="F:Mallenom.AssertionConditionType.IS_TRUE">
+            <summary>Marked parameter should be evaluated to true</summary>
+        </member>
+        <member name="F:Mallenom.AssertionConditionType.IS_FALSE">
+            <summary>Marked parameter should be evaluated to false</summary>
+        </member>
+        <member name="F:Mallenom.AssertionConditionType.IS_NULL">
+            <summary>Marked parameter should be evaluated to null value</summary>
+        </member>
+        <member name="F:Mallenom.AssertionConditionType.IS_NOT_NULL">
+            <summary>Marked parameter should be evaluated to not null value</summary>
+        </member>
+        <member name="T:Mallenom.TerminatesProgramAttribute">
+            <summary>
+            Indicates that the marked method unconditionally terminates control flow execution.
+            For example, it could unconditionally throw exception
+            </summary>
+        </member>
+        <member name="T:Mallenom.LinqTunnelAttribute">
+            <summary>
+            Indicates that method is pure LINQ method, with postponed enumeration (like Enumerable.Select,
+            .Where). This annotation allows inference of [InstantHandle] annotation for parameters
+            of delegate type by analyzing LINQ method chains.
+            </summary>
+        </member>
+        <member name="T:Mallenom.NoEnumerationAttribute">
+            <summary>
+            Indicates that IEnumerable, passed as parameter, is not enumerated.
+            </summary>
+        </member>
+        <member name="T:Mallenom.RegexPatternAttribute">
+            <summary>
+            Indicates that parameter is regular expression pattern.
+            </summary>
+        </member>
+        <member name="T:Mallenom.XamlItemsControlAttribute">
+            <summary>
+            XAML attribute. Indicates the type that has <c>ItemsSource</c> property and should be
+            treated as <c>ItemsControl</c>-derived type, to enable inner  items <c>DataContext</c>
+            type resolve.
+            </summary>
+        </member>
+        <member name="T:Mallenom.XamlItemBindingOfItemsControlAttribute">
+            <summary>
+            XAML attibute. Indicates the property of some <c>BindingBase</c>-derived type, that
+            is used to bind some item of <c>ItemsControl</c>-derived type. This annotation will
+            enable the <c>DataContext</c> type resolve for XAML bindings for such properties.
+            </summary>
+            <remarks>
+            Property should have the tree ancestor of the <c>ItemsControl</c> type or
+            marked with the <see cref="T:Mallenom.XamlItemsControlAttribute"/> attribute.
+            </remarks>
+        </member>
+        <member name="T:Mallenom.NoReorder">
+            <summary>
+            Prevents the Member Reordering feature from tossing members of the marked class.
+            </summary>
+            <remarks>
+            The attribute must be mentioned in your member reordering patterns.
+            </remarks>
+        </member>
+        <member name="T:Mallenom.Assert">
+            <summary>A static class for verifying assumptions.</summary>
+        </member>
+        <member name="T:Mallenom.Assert.EvaluateFunction">
+            <summary>A function signature for Assert.Evaluate.</summary>
+        </member>
+        <member name="T:Mallenom.Assert.ImplicationFunction">
+            <summary>A function signature for Assert.Implies.</summary>
+            <returns>Returns the truth of a predicate.</returns>
+        </member>
+        <member name="M:Mallenom.Assert.Evaluate(Mallenom.Assert.EvaluateFunction)">
+            <summary>
+            Executes the specified argument.
+            </summary>
+            <param name="argument">The function to execute.</param>
+        </member>
+        <member name="M:Mallenom.Assert.AreEqual``1(``0,``0)">
+            <summary>
+            Verifies that two generic type data are equal.  The assertion fails if they are not.
+            </summary>
+            <typeparam name="T">The generic type to compare for equality.</typeparam>
+            <param name="expected">The first generic type data to compare.  This is is the expected value.</param>
+            <param name="actual">The second generic type data to compare.  This is the actual value.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.AreNotEqual``1(``0,``0)">
+            <summary>
+            Verifies that two generic type data are not equal.  The assertion fails if they are.
+            </summary>
+            <typeparam name="T">The generic type to compare for inequality.</typeparam>
+            <param name="notExpected">The first generic type data to compare.  This is is the value that's not expected.</param>
+            <param name="actual">The second generic type data to compare.  This is the actual value.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.Implies(System.Boolean,System.Boolean)">
+            <summary>
+            Verifies that if the specified condition is true, then so is the result.
+            The assertion fails if the condition is true but the result is false.
+            </summary>
+            <param name="condition">if set to <c>true</c> [condition].</param>
+            <param name="result">
+            A second Boolean statement.  If the first was true then so must this be.
+            If the first statement was false then the value of this is ignored.
+            </param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.Implies(System.Boolean,Mallenom.Assert.ImplicationFunction)">
+            <summary>
+            Lazy evaluation overload.  Verifies that if a condition is true, then so is a secondary value.
+            </summary>
+            <param name="condition">The conditional value.</param>
+            <param name="result">A function to be evaluated for truth if the condition argument is true.</param>
+            <remarks>
+            This overload only evaluates the result if the first condition is true.
+            </remarks>
+        </member>
+        <member name="M:Mallenom.Assert.IsNeitherNullNorEmpty(System.String)">
+            <summary>
+            Verifies that a string has content.  I.e. it is not null and it is not empty.
+            </summary>
+            <param name="value">The string to verify.</param>
+        </member>
+        <member name="M:Mallenom.Assert.IsNeitherNullNorWhitespace(System.String)">
+            <summary>
+            Verifies that a string has content.  I.e. it is not null and it is not purely whitespace.
+            </summary>
+            <param name="value">The string to verify.</param>
+        </member>
+        <member name="M:Mallenom.Assert.IsNotNull``1(``0)">
+            <summary>
+            Verifies the specified value is not null.  The assertion fails if it is.
+            </summary>
+            <typeparam name="T">The generic reference type.</typeparam>
+            <param name="value">The value to check for nullness.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.IsFalse(System.Boolean)">
+            <summary>
+            Verifies that the specified condition is false.  The assertion fails if it is true.
+            </summary>
+            <param name="condition">The expression that should be <c>false</c>.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.IsFalse(System.Boolean,System.String)">
+            <summary>
+            Verifies that the specified condition is false.  The assertion fails if it is true.
+            </summary>
+            <param name="condition">The expression that should be <c>false</c>.</param>
+            <param name="message">The message to display if the condition is <c>true</c>.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.IsTrue(System.Boolean)">
+            <summary>
+            Verifies that the specified condition is true.  The assertion fails if it is not.
+            </summary>
+            <param name="condition">A condition that is expected to be <c>true</c>.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.IsTrue(System.Boolean,System.String)">
+            <summary>
+            Verifies that the specified condition is true.  The assertion fails if it is not.
+            </summary>
+            <param name="condition">A condition that is expected to be <c>true</c>.</param>
+            <param name="message">The message to write in case the condition is <c>false</c>.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.Fail">
+            <summary>
+            This line should never be executed.  The assertion always fails.
+            </summary>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.Fail(System.String)">
+            <summary>
+            This line should never be executed.  The assertion always fails.
+            </summary>
+            <param name="message">The message to display if this function is executed.</param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="M:Mallenom.Assert.IsNull``1(``0)">
+            <summary>
+            Verifies that the specified object is null.  The assertion fails if it is not.
+            </summary>
+            <param name="item">The item to verify is null.</param>
+        </member>
+        <member name="M:Mallenom.Assert.BoundedDoubleInc(System.Double,System.Double,System.Double)">
+            <summary>
+            Verifies that the specified value is within the expected range.  The assertion fails if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+        </member>
+        <member name="M:Mallenom.Assert.BoundedInteger(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Verifies that the specified value is within the expected range.  The assertion fails if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundExclusive">The upper bound exclusive value.</param>
+        </member>
+        <member name="M:Mallenom.Assert.IsApartmentState(System.Threading.ApartmentState)">
+            <summary>
+            Verify the current thread's apartment state is what's expected.  The assertion fails if it isn't
+            </summary>
+            <param name="expectedState">
+            The expected apartment state for the current thread.
+            </param>
+            <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
+        </member>
+        <member name="T:Mallenom.Verify">
+            <summary>
+            A static class for retail validated assertions.
+            Instead of breaking into the debugger an exception is thrown.
+            </summary>
+        </member>
+        <member name="T:Mallenom.Verify.Argument">
+            <summary>Argument verification methods.</summary>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNeitherNullNorEmpty(System.String,System.String)">
+            <summary>Ensure that a string argument is neither <c>null</c> nor empty.</summary>
+            <param name="value">The string to validate.</param>
+            <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="value"/> is empty.
+            </exception>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="value"/> == <c>null</c>.
+            </exception>
+            <example><code>
+            void Method(string argument)
+            {
+            	Verify.Argument.IsNeitherNullNorEmpty(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNeitherNullNorWhitespace(System.String,System.String)">
+            <summary>Ensure that a string argument is neither <c>null</c> nor does it consist only of whitespace.</summary>
+            <param name="value">The string to validate.</param>
+            <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="value"/> is empty or consists of whitespace only.
+            </exception>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="value"/> == <c>null</c>.
+            </exception>
+            <example><code>
+            void Method(string argument)
+            {
+            	Verify.Argument.IsNeitherNullNorWhitespace(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotDefault``1(``0,System.String)">
+            <summary>Verifies that an argument is not default value.</summary>
+            <typeparam name="T">Type of the object to validate. Must be a value-type.</typeparam>
+            <param name="value">Value to validate.</param>
+            <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="value"/> equals <c>default(T)</c>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsNotDefault(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNull``1(``0,System.String)">
+            <summary>Verifies that an argument is not <c>null</c>.</summary>
+            <typeparam name="T">Type of the object to validate. Must be a reference-type.</typeparam>
+            <param name="value">The object to validate.</param>
+            <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="value"/> == <c>null</c>.
+            </exception>
+            <example><code>
+            void Method(object argument)
+            {
+            	Verify.Argument.IsNotNull(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNull``1(``0,System.String)">
+            <summary>Verifies that an argument is <c>null</c>.</summary>
+            <typeparam name="T">Type of the object to validate. Must be a reference-type.</typeparam>
+            <param name="value">The object to validate.</param>
+            <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="value"/> != <c>null</c>.
+            </exception>
+            <example><code>
+            void Method(object argument)
+            {
+            	Verify.Argument.IsNull(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNegative(System.SByte,System.String)">
+            <summary>
+            Verifies that argument is not a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; 0.
+            </exception>
+            <example><code>
+            void Method(sbyte argument)
+            {
+            	Verify.Argument.IsNotNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNegative(System.Int16,System.String)">
+            <summary>
+            Verifies that argument is not a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; 0.
+            </exception>
+            <example><code>
+            void Method(short argument)
+            {
+            	Verify.Argument.IsNotNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNegative(System.Int32,System.String)">
+            <summary>
+            Verifies that argument is not a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; 0.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsNotNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNegative(System.Int64,System.String)">
+            <summary>
+            Verifies that argument is not a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; 0.
+            </exception>
+            <example><code>
+            void Method(long argument)
+            {
+            	Verify.Argument.IsNotNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNegative(System.Single,System.String)">
+            <summary>
+            Verifies that argument is not a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; 0.
+            </exception>
+            <example><code>
+            void Method(float argument)
+            {
+            	Verify.Argument.IsNotNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNegative(System.Double,System.String)">
+            <summary>
+            Verifies that argument is not a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; 0.
+            </exception>
+            <example><code>
+            void Method(double argument)
+            {
+            	Verify.Argument.IsNotNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotNegative(System.Decimal,System.String)">
+            <summary>
+            Verifies that argument is not a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; 0.
+            </exception>
+            <example><code>
+            void Method(decimal argument)
+            {
+            	Verify.Argument.IsNotNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNegative(System.SByte,System.String)">
+            <summary>
+            Verifies that argument is a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &gt;= 0.
+            </exception>
+            <example><code>
+            void Method(sbyte argument)
+            {
+            	Verify.Argument.IsNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNegative(System.Int16,System.String)">
+            <summary>
+            Verifies that argument is a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &gt;= 0.
+            </exception>
+            <example><code>
+            void Method(short argument)
+            {
+            	Verify.Argument.IsNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNegative(System.Int32,System.String)">
+            <summary>
+            Verifies that argument is a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &gt;= 0.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNegative(System.Int64,System.String)">
+            <summary>
+            Verifies that argument is a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &gt;= 0.
+            </exception>
+            <example><code>
+            void Method(long argument)
+            {
+            	Verify.Argument.IsNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNegative(System.Single,System.String)">
+            <summary>
+            Verifies that argument is a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &gt;= 0.
+            </exception>
+            <example><code>
+            void Method(float argument)
+            {
+            	Verify.Argument.IsNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNegative(System.Double,System.String)">
+            <summary>
+            Verifies that argument is a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &gt;= 0.
+            </exception>
+            <example><code>
+            void Method(double argument)
+            {
+            	Verify.Argument.IsNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNegative(System.Decimal,System.String)">
+            <summary>
+            Verifies that argument is a negative number. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &gt;= 0.
+            </exception>
+            <example><code>
+            void Method(decimal argument)
+            {
+            	Verify.Argument.IsNegative(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.SByte,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(sbyte argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.Byte,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(byte argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.Int16,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(short argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.Int32,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.Int64,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(long argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.Single,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(float argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.Double,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(double argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsPositive(System.Decimal,System.String)">
+            <summary>
+            Verifies that argument is a positive number (&gt; 0). Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="value">Parameter value to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt;= 0.
+            </exception>
+            <example><code>
+            void Method(decimal argument)
+            {
+            	Verify.Argument.IsPositive(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Boolean,System.String)">
+            <summary>
+            Verifies the specified statement is <c>true</c>. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>true</c>.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsInRange(argument &gt; 4, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Boolean,System.String,System.String)">
+            <summary>
+            Verifies the specified statement is <c>true</c>. Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>true</c>.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <param name="message">The message to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsInRange(argument &gt; 4, "argument", "Must be greater than 4.");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.SByte,System.SByte,System.SByte,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Byte,System.Byte,System.Byte,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Char,System.Char,System.Char,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Int16,System.Int16,System.Int16,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.UInt16,System.UInt16,System.UInt16,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.UInt32,System.UInt32,System.UInt32,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Int64,System.Int64,System.Int64,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.UInt64,System.UInt64,System.UInt64,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Single,System.Single,System.Single,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Double,System.Double,System.Double,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsInRange(System.Decimal,System.Decimal,System.Decimal,System.String)">
+            <summary>
+            Verifies that the specified value is within the expected range. 
+            Throws an <see cref="T:System.ArgumentOutOfRangeException"/> if it isn't.
+            </summary>
+            <param name="lowerBoundInclusive">The lower bound inclusive value.</param>
+            <param name="value">The value to verify.</param>
+            <param name="upperBoundInclusive">The upper bound inclusive value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> &lt; <paramref name="lowerBoundInclusive"/> or
+            <paramref name="value"/> &gt; <paramref name="upperBoundInclusive"/>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsValidIndex(System.Int16,System.Int16,System.String)">
+            <summary>Verifies that the specified value is a valid index for a collection.</summary>
+            <param name="itemsCount">Collection items count.</param>
+            <param name="value">Index value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> is not a valid index.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsValidIndex(System.Int32,System.Int32,System.String)">
+            <summary>Verifies that the specified value is a valid index for a collection.</summary>
+            <param name="itemsCount">Collection items count.</param>
+            <param name="value">Index value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> is not a valid index.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsValidIndex(System.Int64,System.Int64,System.String)">
+            <summary>Verifies that the specified value is a valid index for a collection.</summary>
+            <param name="itemsCount">Collection items count.</param>
+            <param name="value">Index value.</param>
+            <param name="parameterName">Parameter name to include in <see cref="T:System.ArgumentOutOfRangeException"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="value"/> is not a valid index.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsEqualTo``1(``0,``0,System.String)">
+            <summary>
+            Verifies that argument equals expected value. Throws an <see cref="T:System.ArgumentException"/> if it's not.
+            </summary>
+            <param name="expected">Expected value.</param>
+            <param name="actual">Actual value.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="actual"/> != <paramref name="expected"/>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsEqualTo(10, argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsEqualTo``1(``0,``0,System.String,System.String)">
+            <summary>
+            Verifies that argument equals expected value. Throws an <see cref="T:System.ArgumentException"/> if it's not.
+            </summary>
+            <param name="expected">Expected value.</param>
+            <param name="actual">Actual value.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <param name="message">The message to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="actual"/> != <paramref name="expected"/>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsEqualTo(10, argument, "argument", "Must be 10.");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotEqualTo``1(``0,``0,System.String)">
+            <summary>
+            Verifies that argument is not of unexpected value. Throws an <see cref="T:System.ArgumentException"/> if it is.
+            </summary>
+            <param name="notExpected">Invalid value.</param>
+            <param name="actual">Actual value.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="actual"/> == <paramref name="notExpected"/>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsNotEqualTo(10, argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsNotEqualTo``1(``0,``0,System.String,System.String)">
+            <summary>
+            Verifies that argument is not of unexpected value. Throws an <see cref="T:System.ArgumentException"/> if it is.
+            </summary>
+            <param name="notExpected">Invalid value.</param>
+            <param name="actual">Actual value.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <param name="message">The message to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="actual"/> == <paramref name="notExpected"/>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsNotEqualTo(10, argument, "argument", "Must not be 10.");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsTrue(System.Boolean,System.String)">
+            <summary>
+            Verifies the specified statement is <c>true</c>. Throws an <see cref="T:System.ArgumentException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>true</c>.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+            <example><code>
+            void Method(string argument)
+            {
+            	Verify.Argument.IsTrue(argument.Length == 10, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsTrue(System.Boolean,System.String,System.String)">
+            <summary>
+            Verifies the specified statement is <c>true</c>. Throws an <see cref="T:System.ArgumentException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>true</c>.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <param name="message">The message to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+            <example><code>
+            void Method(string argument)
+            {
+            	Verify.Argument.IsTrue(argument.Length == 10, "argument", "String length must be 10.");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsFalse(System.Boolean,System.String)">
+            <summary>
+            Verifies the specified statement is <c>false</c>. Throws an <see cref="T:System.ArgumentException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>false</c>.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsFalse(argument == 10, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsFalse(System.Boolean,System.String,System.String)">
+            <summary>
+            Verifies the specified statement is <c>false</c>. Throws an <see cref="T:System.ArgumentException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>false</c>.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <param name="message">The message to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+            <example><code>
+            void Method(int argument)
+            {
+            	Verify.Argument.IsFalse(argument == 10, "argument", "Value must not be 10.");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.HasNoNullItems``1(System.Collections.Generic.IEnumerable{``0},System.String)">
+            <summary>
+            Verifies that sequence contains no <c>null</c> items.
+            Throws an <see cref="T:System.ArgumentException"/> if contains.
+            </summary>
+            <param name="sequence">Sequence to validate.</param>
+            <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="sequence"/> == <c>null</c>.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="sequence"/> contains <c>null</c> items.
+            </exception>
+            <example><code>
+            void Method(object[] values)
+            {
+            	Verify.Argument.HasNoNullItems(values, "values");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.FileExists(System.String,System.String)">
+            <summary>Verifies that argument is an existing file.</summary>
+            <param name="filePath">File path.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="filePath"/> == <c>null</c>.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            File does not exist or <paramref name="filePath"/> is not a valid path.
+            </exception>
+            <example><code>
+            void Method(string argument)
+            {
+            	Verify.Argument.FileExists(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.DirectoryExists(System.String,System.String)">
+            <summary>Verifies that argument is an existing directory.</summary>
+            <param name="directoryPath">Directory path.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="directoryPath"/> == <c>null</c>.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            Directory does not exist or <paramref name="directoryPath"/> is not a valid path.
+            </exception>
+            <example><code>
+            void Method(string argument)
+            {
+            	Verify.Argument.DirectoryExists(argument, "argument");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsAbsoluteUri(System.Uri,System.String)">
+            <summary>
+            Verifies that the specified URI is absolute.
+            </summary>
+            <param name="uri">URI to verify.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="uri"/> == <c>null</c>.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="uri"/> is relative.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.ImplementsInterface(System.Object,System.Type,System.String)">
+            <summary>Verifies that parameter implements specified interface.</summary>
+            <param name="parameter">Object to validate.</param>
+            <param name="interfaceType">Interface type.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="parameter"/> == <c>null</c>
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="parameter"/> does not implement specified interface.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsOfExactType(System.Object,System.Type,System.String)">
+            <summary>Verifies that parameter is of specified type.</summary>
+            <param name="parameter">Object to validate.</param>
+            <param name="requiredType">Expected type.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="parameter"/> == <c>null</c>
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="parameter"/> is not of specified type.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsOfExactType``1(System.Object,System.String)">
+            <summary>Verifies that parameter is of specified type.</summary>
+            <typeparam name="T">Expected type.</typeparam>
+            <param name="parameter">Object to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="parameter"/> == <c>null</c>
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="parameter"/> is not of specified type.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsOfType(System.Object,System.Type,System.String)">
+            <summary>Verifies that parameter is of specified type or type which is based on specified type.</summary>
+            <param name="parameter">Object to validate.</param>
+            <param name="requiredType">Expected type.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="parameter"/> == <c>null</c>
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="parameter"/> is not of specified type.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.Argument.IsOfType``1(System.Object,System.String)">
+            <summary>Verifies that parameter is of specified type or type which is based on specified type.</summary>
+            <typeparam name="T">Expected type.</typeparam>
+            <param name="parameter">Object to validate.</param>
+            <param name="parameterName">Name of the parameter to include in the <see cref="T:System.ArgumentException"/>.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="parameter"/> == <c>null</c>
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="parameter"/> is not of specified type.
+            </exception>
+        </member>
+        <member name="T:Mallenom.Verify.State">
+            <summary>Program, thread and object state verification methods.</summary>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsApartmentState(System.Threading.ApartmentState,System.String)">
+            <summary>Ensure that the current thread's apartment state is what's expected.</summary>
+            <param name="requiredState">The required apartment state for the current thread.</param>
+            <param name="message">The message string for the exception to be thrown if the state is invalid.</param>
+            <exception cref="T:System.InvalidOperationException">
+            Thrown if the calling thread's apartment state is not the same as the <paramref name="requiredState"/>.
+            </exception>
+            <example><code>
+            void Method()
+            {
+            	Verify.State.IsApartmentState(ApartmentState.STA, "Must run on STA thread.");
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsApartmentState(System.Threading.ApartmentState)">
+            <summary>Ensure that the current thread's apartment state is what's expected.</summary>
+            <param name="requiredState">The required apartment state for the current thread.</param>
+            <exception cref="T:System.InvalidOperationException">
+            Thrown if the calling thread's apartment state is not the same as the <paramref name="requiredState"/>.
+            </exception>
+            <example><code>
+            void Method()
+            {
+            	Verify.State.IsApartmentState(ApartmentState.STA);
+            }
+            </code></example>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsTrue(System.Boolean)">
+            <summary>
+            Verifies the specified statement is <c>true</c>true. Throws an <see cref="T:System.InvalidOperationException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>true</c>.</param>
+            <exception cref="T:System.InvalidOperationException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsTrue(System.Boolean,System.String)">
+            <summary>
+            Verifies the specified statement is <c>true</c>. Throws an <see cref="T:System.InvalidOperationException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>true</c>.</param>
+            <param name="message">The message to include in the <see cref="T:System.InvalidOperationException"/>.</param>
+            <exception cref="T:System.InvalidOperationException">
+            <paramref name="statement"/> == <c>false</c>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsFalse(System.Boolean)">
+            <summary>
+            Verifies the specified statement is <c>false</c>. Throws an <see cref="T:System.InvalidOperationException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>false</c>.</param>
+            <exception cref="T:System.InvalidOperationException">
+            <paramref name="statement"/> == <c>true</c>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsFalse(System.Boolean,System.String)">
+            <summary>
+            Verifies the specified statement is <c>false</c>. Throws an <see cref="T:System.InvalidOperationException"/> if it's not.
+            </summary>
+            <param name="statement">The statement to be verified as <c>false</c>.</param>
+            <param name="message">The message to include in the <see cref="T:System.InvalidOperationException"/>.</param>
+            <exception cref="T:System.InvalidOperationException">
+            <paramref name="statement"/> == <c>true</c>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsNotDisposed(System.Object,System.Boolean)">
+            <summary>
+            Verifies the specified instance is not disposed. Throws an <see cref="T:System.ObjectDisposedException"/> if it is.
+            </summary>
+            <param name="instance">Object instance.</param>
+            <param name="isDisposed">Instance disposed status.</param>
+            <exception cref="T:System.ObjectDisposedException">
+            <paramref name="isDisposed"/> == <c>true</c>.
+            </exception>
+        </member>
+        <member name="M:Mallenom.Verify.State.IsNotDisposed(System.Object,System.Boolean,System.String)">
+            <summary>
+            Verifies the specified instance is not disposed. Throws an <see cref="T:System.ObjectDisposedException"/> if it is.
+            </summary>
+            <param name="instance">Object instance.</param>
+            <param name="isDisposed">Instance disposed status.</param>
+            <param name="message">The message to include in the <see cref="T:System.ObjectDisposedException"/>.</param>
+            <exception cref="T:System.ObjectDisposedException">
+            <paramref name="isDisposed"/> == <c>true</c>.
+            </exception>
+        </member>
+        <member name="T:Mallenom.Video.FFmpeg.FFmpegFileEnumerate`1">
+            <summary>Класс для получения видеопотока в виде отдельных изображений из видеофайла.</summary>
+            <typeparam name="T">Тип объекта, который содержит изображение.</typeparam>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegFileEnumerate`1.#ctor(System.String)">
+            <summary>Создает объект для указанного видеофайла.</summary>
+            <param name="streamUrl">Имя видеофайла.</param>
+        </member>
+        <member name="T:Mallenom.Video.FFmpeg.FFmpegVideoSource">
+            <summary>
+            Видеоисточник, использующий библиотеку FFmpeg для стриминга, демультиплексирования
+            и декодирования мультимедийного потока.
+            </summary>
+        </member>
+        <member name="T:Mallenom.Video.FFmpeg.FFmpegVideoSource.StreamingContext">
+            <summary>Контекст чтения и декодирования потока.</summary>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSource.StreamingContext.Open(System.String)">
+            <summary>Открывает поток для чтения и декодирования.</summary>
+            <param name="streamUrl">URL потока.</param>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSource.StreamUrl">
+            <summary>Возвращает и устанавливает URL потока.</summary>
+            <value>URL потока.</value>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSource.State">
+            <summary>Возвращает состояние видеоисточника.</summary>
+            <value>Состояние видеоисточника.</value>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSource.SupportedMatrixTypes">
+            <summary>Возвращает список поддерживаемых источником типов матриц.</summary>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSource.PreferredMatrixType">
+            <summary>Возвращает предпочитаемый тип матрицы.</summary>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSource.RepeatAfterMediaEnded">
+            <summary>Повторять при завершении воспроизведения.</summary>
+            <value><c>true</c> - повторять, <c>false</c> - не повторять.</value>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSource.#ctor">
+            <summary>Создание <see cref="T:Mallenom.Video.FFmpeg.FFmpegVideoSource"/>.</summary>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSource.CreatePreferredMatrix">
+            <summary>Создает матрицу предпочитаемого типа.</summary>
+            <returns>Матрица предпочитаемого типа.</returns>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSource.Open">
+            <summary>Открывает видеоисточник.</summary>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSource.Start">
+            <summary>Запускает видеоисточник.</summary>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSource.Stop">
+            <summary>Останавливает видеоисточник.</summary>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSource.Close">
+            <summary>Закрывает видеоисточник.</summary>
+        </member>
+        <member name="T:Mallenom.Video.FFmpeg.FFmpegVideoSourceConfiguration">
+            <summary>Конфигурация видеоисточника <see cref="T:Mallenom.Video.FFmpeg.FFmpegVideoSource"/>.</summary>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceConfiguration.LoadVideoSourceConfigurationCore(Mallenom.Video.FFmpeg.FFmpegVideoSource,Mallenom.Storage.IObjectStorageReader)">
+            <summary>Выполняет загрузку конфигурации источника.</summary>
+            <param name="videoSource">Видеоисточник, конфигурация которого будет загружена.</param>
+            <param name="reader">Объект для чтения параметров.</param>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceConfiguration.SaveVideoSourceConfigurationCore(Mallenom.Video.FFmpeg.FFmpegVideoSource,Mallenom.Storage.IObjectStorageWriter)">
+            <summary>Выполняет сохранение конфигурации источника.</summary>
+            <param name="videoSource">Видеоисточник, конфигурация которого будет сохранена.</param>
+            <param name="writer">Объект для записи параметров.</param>
+        </member>
+        <member name="T:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider">
+            <summary>Провайдер видеоисточника <see cref="T:Mallenom.Video.FFmpeg.FFmpegVideoSource"/>.</summary>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider.Name">
+            <summary>Возвращает имя видеоисточника.</summary>
+            <value>Имя видеоисточника.</value>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider.Description">
+            <summary>Возвращает описание видеоисточника.</summary>
+            <value>Описание видеоисточника.</value>
+        </member>
+        <member name="P:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider.SourceType">
+            <summary>Возвращает тип создаваемого видеоисточника.</summary>
+            <value>Тип создаваемого видеоисточника.</value>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider.CreateSetupControl(Mallenom.Video.IVideoSource)">
+            <summary>Создает и возвращает контрол для настройки видеоисточника.</summary>
+            <param name="source">Видеоисточник.</param>
+            <returns>Контрол настройки.</returns>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider.CreateVideoSource">
+            <summary>Создает и возвращает объект видеоисточника.</summary>
+            <returns>Видеоисточник.</returns>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider.Supports(Mallenom.Video.IPCameraConnectionConfiguration)">
+            <summary>
+            Проверяет, поддерживает ли видеоисточник указанную конфигурацию подключения к
+            IP-камере.
+            </summary>
+            <param name="configuration">Конфигурация подключения к IP-камере.</param>
+            <returns><c>true</c>, если конфигурация поддерживается, иначе - <c>false</c>.</returns>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider.Configure(Mallenom.Video.IVideoSource,Mallenom.Video.IPCameraConnectionConfiguration)">
+            <summary>
+            Настраивает указанный видеоисточник в соответствии с конфигурацией подключения
+            к IP-камере.
+            </summary>
+            <param name="videoSource">Настраиваемый видеоисточник.</param>
+            <param name="configuration">Конфигурация подключения к IP-камере.</param>
+        </member>
+        <member name="F:Mallenom.Video.FFmpeg.FFmpegVideoSourceSetupControl.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceSetupControl.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Mallenom.Video.FFmpeg.FFmpegVideoSourceSetupControl.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Mallenom.Video.FFmpeg.UnmanagedImageReceiver">
+            <summary>Получатель кадров.</summary>
+        </member>
+    </members>
+</doc>

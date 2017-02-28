@@ -185,7 +185,7 @@ namespace Recognizer.Detector
 		}
 
 		/// <summary>
-		/// Обновляет свойства InputMatrix и OutputMatrix новыми значениями, полученными из colorMatrix. 
+		/// Обновляет свойства InputMatrix и OutputMatrix новыми значениями, полученными из bitmap. 
 		/// </summary>
 		public void UpdateImages(System.Drawing.Bitmap bitmap)
 		{
@@ -194,6 +194,18 @@ namespace Recognizer.Detector
 				Mat mat = BitmapConverter.ToMat(bitmap);
 
 				InputMatrix = mat;
+				OutputMatrix = InputMatrix.Clone();
+			}
+		}
+
+		/// <summary>
+		/// Обновляет свойства InputMatrix и OutputMatrix новыми значениями, полученными из colorMatrix. 
+		/// </summary>
+		public void UpdateImages(ColorMatrix colorMatrix)
+		{
+			if(colorMatrix != null)
+			{
+				InputMatrix = ColorMatrixExtensions.ToMat(colorMatrix);
 				OutputMatrix = InputMatrix.Clone();
 			}
 		}

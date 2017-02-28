@@ -28,13 +28,6 @@ namespace Recognizer
 		IVideoSource _videoSource;
 		IImageMatrix _matrix;
 
-		private readonly Frame _frame;
-
-		/**
-		IVideoSourceProvider _testVideoSourceProvider;
-		IVideoSource _testVideoSource;
-		IImageMatrix _testVideoMatrix;
-		/**/
 
 		FaceDetector _faceDetector;
 		object facesLock = new object();
@@ -44,88 +37,64 @@ namespace Recognizer
 			InitializeComponent();
 			this.FormClosing += OnMainFormClosing;
 
-			//_frame = new Frame(3, 3, 100, 50, Color.Coral);
-			//_frame.Locked = true;
 
-			//_frameImage.Frames.Add(_frame);
-
-			//_frame.Visible = true;
-			/**
 			_videoSourceProvider = videoSourceProvider;
-			_videoSource = videoSource;
 			_matrix = new ColorMatrix();
-
-			//currnet
-			//_matrix.ImageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
-			//current
-
-			_videoImage.Matrix = _matrix;
-			_videoImage.ManualUpdateRendererCache = true;
-			_videoImage.SizeMode = ImageSizeMode.Zoom;
-
-			_videoSource.AttachMatrix(_matrix);
-			_videoSource.MatrixUpdated += OnMatrixUpdated;
-			_videoSource.Open();
-
-			//НУЖНО получить из потока изображение	
-			_faceDetector = new FaceDetector(_videoImage);
-
-			/**/
-
-
-			//current
-			/**/
-
-			_faceDetector = new FaceDetector(_frameImage);
-			_videoSourceProvider = videoSourceProvider;
-			_videoSource = new FFmpegVideoSource();
-
-			_matrix = new ColorMatrix();
-			//_videoSource.AttachMatrix(_matrix);
-
-
-			var c = new Mallenom.Video.FFmpeg.FFmpegVideoSource();
-			c.RepeatAfterMediaEnded = true;
-			c.StreamUrl = "testing_video.avi";
-			c.AttachMatrix(_matrix);
-
-			_videoSource = c;
 
 			_frameImage.Matrix = _matrix;
 			_frameImage.ManualUpdateRendererCache = true;
 			_frameImage.SizeMode = ImageSizeMode.Zoom;
 
-
+			var c = new FFmpegVideoSource();
+			c.RepeatAfterMediaEnded = true;
+			c.StreamUrl = "testing_video.avi";
+			c.AttachMatrix(_matrix);
+			_videoSource = c;
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
 
-			c.Open();
-			c.Start();
+			_faceDetector = new FaceDetector(_frameImage);
+
+			_videoSource.Open();
+			_videoSource.Start();
+
 
 			using(var context = Services.DatabaseService.CreateContext())
 			{
 				context.Database.CreateIfNotExists();
 			}
+
+			//oldest version by artemd
 			/**
+			_videoSourceProvider = videoSourceProvider;
+			_videoSource = videoSource;
+			_matrix = new ColorMatrix();
 
-			Debug.WriteLine(_videoSourceProvider.Description);
-			Debug.WriteLine(c.StreamUrl);
+			_frameImage.Matrix = _matrix;
+			_frameImage.ManualUpdateRendererCache = true;
+			_frameImage.SizeMode = ImageSizeMode.Zoom;
+
+			_videoSource.AttachMatrix(_matrix);
+			_videoSource.MatrixUpdated += OnMatrixUpdated;
+			_videoSource.Open();
 			/**/
 
-
+			//тестирование видео без зума, Frames рисуются нормально
 			/**
-			Debug.WriteLine(_videoImage.Width);
-			Debug.WriteLine(_videoImage.Height);
-			_videoImage.Load("1234.bmp");
-			Debug.WriteLine(_videoImage.Matrix.Stride);
-
-			Debug.WriteLine(_videoImage.Matrix.DataFormat);
-			Debug.WriteLine(_videoSource.State);
+			_videoSourceProvider = videoSourceProvider;
+			_frameImage.SizeMode = ImageSizeMode.Zoom;
+			var source = new FFmpegVideoSource();
+			_matrix = new ColorMatrix();
+			source.StreamUrl = "testing_video.avi";
+			_frameImage.ManualUpdateRendererCache = true;
+			source.RepeatAfterMediaEnded = true;
+			_videoSource = source;
+			_videoSource.MatrixUpdated += OnMatrixUpdated;
+			_frameImage.Matrix = _matrix;
+			_faceDetector = new FaceDetector(_frameImage);
+			_videoSource.AttachMatrix(_matrix);
+			_videoSource.Open();
+			_videoSource.Start();
 			/**/
-
-			//_logView.Appender = new LogViewAppender();
-			/**/
-
-
 		}
 
 		private void OnMainFormClosing(object sender, FormClosingEventArgs e)
@@ -161,6 +130,7 @@ namespace Recognizer
 				//_faceDetector.DetectFaces();
 				//_faceDetector.DrawFaceRectangles();
 				_faceDetector.UpdateImages(_matrix.CreateBitmap());
+
 				var rects = _faceDetector.DetectFaces();
 
 				if(_frameImage.InvokeRequired)
