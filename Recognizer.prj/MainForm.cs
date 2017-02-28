@@ -27,16 +27,20 @@ namespace Recognizer
 		IVideoSource _videoSource;
 		IImageMatrix _matrix;
 
+		/**
 		IVideoSourceProvider _testVideoSourceProvider;
 		IVideoSource _testVideoSource;
 		IImageMatrix _testVideoMatrix;
+		/**/
 
 		FaceDetector _faceDetector;
+		object facesLock = new object();
 
 		public MainForm(IVideoSourceProvider videoSourceProvider, IVideoSource videoSource)
 		{
 			InitializeComponent();
-
+			this.FormClosing += OnMainFormClosing;
+			/**
 			_videoSourceProvider = videoSourceProvider;
 			_videoSource = videoSource;
 			_matrix = new ColorMatrix();
@@ -56,23 +60,20 @@ namespace Recognizer
 			//НУЖНО получить из потока изображение	
 			_faceDetector = new FaceDetector(_videoImage);
 
+			/**/
+
 
 			//current
 			/**/
+
+			_faceDetector = new FaceDetector(_videoImage);
+			_videoSourceProvider = videoSourceProvider;
 			_videoSource = new FFmpegVideoSource();
-			_videoSource.DetachAllMatrices();
-			_videoSource.AttachMatrix(_matrix);
 
-			Debug.WriteLine(_videoImage.Width);
-			Debug.WriteLine(_videoImage.Height);
-			//_videoImage.Load("1234.bmp");
-			Debug.WriteLine(_videoImage.Matrix.Stride);
+			_matrix = new ColorMatrix();
+			//_videoSource.AttachMatrix(_matrix);
 
-			Debug.WriteLine(_videoImage.Matrix.DataFormat);
-			Debug.WriteLine(_videoSource.State);
 
-			_logView.Appender = new LogViewAppender();
-			/**
 			var c = new Mallenom.Video.FFmpeg.FFmpegVideoSource();
 			c.RepeatAfterMediaEnded = true;
 			c.StreamUrl = "testing_video.avi";
@@ -84,11 +85,9 @@ namespace Recognizer
 			_videoImage.ManualUpdateRendererCache = true;
 			_videoImage.SizeMode = ImageSizeMode.Zoom;
 
-			
+
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
-			//_videoSource.Open();
-			/**
-			
+
 			c.Open();
 			c.Start();
 			/**
@@ -97,28 +96,64 @@ namespace Recognizer
 			Debug.WriteLine(c.StreamUrl);
 			/**/
 
+
+			/**
+			Debug.WriteLine(_videoImage.Width);
+			Debug.WriteLine(_videoImage.Height);
+			_videoImage.Load("1234.bmp");
+			Debug.WriteLine(_videoImage.Matrix.Stride);
+
+			Debug.WriteLine(_videoImage.Matrix.DataFormat);
+			Debug.WriteLine(_videoSource.State);
+			/**/
+
+			//_logView.Appender = new LogViewAppender();
+			/**/
+
+
 		}
 
-		private int _frameCounter;
-		private int _skipFrames = 3;
-
-		private void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
+		private void OnMainFormClosing(object sender, FormClosingEventArgs e)
 		{
+			if(_videoSource != null)
+			{
+				_videoSource.DetachAllMatrices();
+				_videoSource.MatrixUpdated -= OnMatrixUpdated;
+			}
+		}
+
+
+		private int _frameCounter;
+		private int _skipFrames = 15;
+
+		private /*async*/ void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
+		{
+			MethodInvoker mi = new MethodInvoker(()=>
+			{
+				_videoImage.InvalidateCache();
+			});
+
+			_videoImage.BeginInvoke(mi);
+
+			/**/
 			if(_frameCounter >= _skipFrames)
 			{
 				//устанавливаем кадр, который требуется проанализировать
-				_faceDetector.UpdateImages(_matrix.CreateBitmap());
+				//_faceDetector.UpdateImages(_matrix.CreateBitmap());
 
 				//пытаемся распознать человека FaceRecognizer'ом
-				_faceDetector.DetectFaces();
-				_faceDetector.DrawFaceRectangles();
+				//_faceDetector.DetectFaces();
+				//_faceDetector.DrawFaceRectangles();
+
+				/*await*/ FaceProcessingAsync(/*_faceDetector.FacesRepository*/);
 				
 				_frameCounter = 0;
 			}
 			_frameCounter++;
+			/**/
 		}
 
-		private async void OnButtonTestOpenCV_Click(object sender, EventArgs e)
+		private /*async*/ void OnButtonTestOpenCV_Click(object sender, EventArgs e)
 		{
 			OpenFileDialog openFile = new OpenFileDialog();
 			openFile.Title = "Выберите картинку";
@@ -129,10 +164,12 @@ namespace Recognizer
 
 			if(openFile.ShowDialog() == DialogResult.OK)
 			{
+				/**/
 				var detector = new FaceDetector(openFile.FileName);
 
 				detector.DetectFaces();
 				detector.DrawFaceRectangles();
+				/**/
 
 				//string trainDataPath = Path.Combine(
 				//	Directory.GetCurrentDirectory(),
@@ -160,67 +197,75 @@ namespace Recognizer
 				//recognizer.Load();
 				/**/				
 
-				using(var window = new Window("Picture", detector.OutputMatrix))
-				{
-					Cv.WaitKey(1000);
-				}
+				//using(var window = new Window("Picture", detector.OutputMatrix))
+				//{
+				//	Cv.WaitKey(1000);
+				//}
 
-				await FaceProcessingAsync(detector.FacesRepository);
+				/*await*/ FaceProcessingAsync(/*detector.FacesRepository*/);
 			}
 		}
 
-		private Task FaceProcessingAsync(List<Mat> faces)
+		private Task FaceProcessingAsync(/*List<Mat> faces*/)
 		{
 			return Task.Run(() =>
 			{
-				LBPFaceRecognizer recognizer = new LBPFaceRecognizer();
-
-				var trainDataPath = Path.Combine(
-					Directory.GetCurrentDirectory(),
-					"Samples",
-					"LBPFacesCOPY.xml");
-
-				recognizer.Load(trainDataPath);
-
-				foreach(var face in faces)
+				//var detector = new FaceDetector(openFile.FileName);
+				lock(facesLock)
 				{
-					int result = recognizer.Recognize(face);
-					string resultStr = string.Empty;
+					_faceDetector.UpdateImages(_matrix.CreateBitmap());
+					_faceDetector.DetectFaces();
+					_faceDetector.DrawFaceRectangles();
 
-					if(result != -1)
+					LBPFaceRecognizer recognizer = new LBPFaceRecognizer();
+
+					var trainDataPath = Path.Combine(
+						Directory.GetCurrentDirectory(),
+						"Samples",
+						"LBPFacesCOPY.xml");
+
+					recognizer.Load(trainDataPath);				
+
+					foreach(var face in _faceDetector.FacesRepository)
 					{
-						try
+						int result = recognizer.Recognize(face);
+						string resultStr = string.Empty;
+
+						if(result != -1)
 						{
-							var employeeLogRepository = new EmployeesLogRepository(Services.DatabaseService.DbConnectionFactory);
-
-							var filter = new EmployeesLogRepositoryFilter
+							try
 							{
-								PersonLabel = result
-							};
+								var employeeLogRepository = new EmployeesLogRepository(Services.DatabaseService.DbConnectionFactory);
 
-							var employeeRecord = employeeLogRepository
-								.FetchRecord(filter)[0];
+								var filter = new EmployeesLogRepositoryFilter
+								{
+									PersonLabel = result
+								};
 
-							resultStr = "Распознан " + employeeRecord;
+								var employeeRecord = employeeLogRepository
+									.FetchRecord(filter)[0];
+
+								resultStr = "Распознан " + employeeRecord;
+
+								Log.Info(resultStr);
+								//_logView.Text += $"{resultStr}{Environment.NewLine}";
+							}
+							catch(Exception exc)
+							{
+								Log.Error("Ошибка в запросе к БД", exc);
+							}
+						}
+
+						else
+						{
+							resultStr = "Лицо не распознано";
 
 							Log.Info(resultStr);
 							//_logView.Text += $"{resultStr}{Environment.NewLine}";
 						}
-						catch(Exception exc)
-						{
-							Log.Error("Ошибка в запросе к БД", exc);
-						}
-					}
 
-					else
-					{
-						resultStr = "Лицо не распознано";
-
-						Log.Info(resultStr);
-						//_logView.Text += $"{resultStr}{Environment.NewLine}";
-					}
-
-					MessageBox.Show(resultStr, "Recognizer", MessageBoxButtons.OK);
+						//MessageBox.Show(resultStr, "Recognizer", MessageBoxButtons.OK);
+					} 
 				}
 			});
 		}
