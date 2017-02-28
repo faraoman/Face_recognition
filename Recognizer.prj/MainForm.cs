@@ -17,6 +17,7 @@ using static Recognizer.Logs.LoggingService;
 using Recognizer.Database.Data;
 using Mallenom.Diagnostics.Logs;
 using System.Threading.Tasks;
+using System.Drawing;
 
 //Написать фейковый класс, который вернул бы какие-то записи из БД (Для Сони).
 namespace Recognizer
@@ -26,6 +27,8 @@ namespace Recognizer
 		IVideoSourceProvider _videoSourceProvider;
 		IVideoSource _videoSource;
 		IImageMatrix _matrix;
+
+		private readonly Frame _frame;
 
 		/**
 		IVideoSourceProvider _testVideoSourceProvider;
@@ -40,6 +43,13 @@ namespace Recognizer
 		{
 			InitializeComponent();
 			this.FormClosing += OnMainFormClosing;
+
+			_frame = new Frame(3, 3, 100, 50, Color.Coral);
+			_frame.Locked = true;
+
+			_frameImage.Frames.Add(_frame);
+
+			_frame.Visible = true;
 			/**
 			_videoSourceProvider = videoSourceProvider;
 			_videoSource = videoSource;
@@ -66,7 +76,7 @@ namespace Recognizer
 			//current
 			/**/
 
-			_faceDetector = new FaceDetector(_videoImage);
+			_faceDetector = new FaceDetector(_frameImage);
 			_videoSourceProvider = videoSourceProvider;
 			_videoSource = new FFmpegVideoSource();
 
@@ -81,15 +91,20 @@ namespace Recognizer
 
 			_videoSource = c;
 
-			_videoImage.Matrix = _matrix;
-			_videoImage.ManualUpdateRendererCache = true;
-			_videoImage.SizeMode = ImageSizeMode.Zoom;
+			_frameImage.Matrix = _matrix;
+			_frameImage.ManualUpdateRendererCache = true;
+			_frameImage.SizeMode = ImageSizeMode.Zoom;
 
 
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
 
 			c.Open();
 			c.Start();
+
+			using(var context = Services.DatabaseService.CreateContext())
+			{
+				context.Database.CreateIfNotExists();
+			}
 			/**
 
 			Debug.WriteLine(_videoSourceProvider.Description);
@@ -130,10 +145,10 @@ namespace Recognizer
 		{
 			MethodInvoker mi = new MethodInvoker(()=>
 			{
-				_videoImage.InvalidateCache();
+				_frameImage.InvalidateCache();
 			});
 
-			_videoImage.BeginInvoke(mi);
+			_frameImage.BeginInvoke(mi);
 
 			/**/
 			if(_frameCounter >= _skipFrames)
@@ -222,7 +237,7 @@ namespace Recognizer
 					var trainDataPath = Path.Combine(
 						Directory.GetCurrentDirectory(),
 						"Samples",
-						"LBPFacesCOPY.xml");
+						"LBPFaces.xml");
 
 					recognizer.Load(trainDataPath);				
 

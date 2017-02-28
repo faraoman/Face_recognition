@@ -1,16 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using Mallenom;
 using OpenCvSharp.CPlusPlus;
 
 namespace Recognizer.Recognition
 {
+	public class FaceRecognizedEventArgs : EventArgs
+	{
+		public FaceRecognizedEventArgs(string fullName)
+		{
+			Verify.Argument.IsNeitherNullNorEmpty(fullName, nameof(fullName));
+		}
+
+		public string FullName { get; }
+	}
+
 	/// <summary> 
 	/// Класс, реализующий метод распознавания лиц с помощью 
 	/// Local Binary Patterns (LPB). 
 	/// </summary>
 	public class LBPFaceRecognizer
 	{
-		
+		public event EventHandler<FaceRecognizedEventArgs> FaceRecognized;
+
+		private void OnFaceRecognized(FaceRecognizedEventArgs e)
+		{
+			Assert.IsNotNull(e);
+
+			FaceRecognized?.Invoke(this, e);
+		}
+
+
 		private FaceRecognizer _recognizer;
 
 		public LBPFaceRecognizer()
@@ -71,6 +92,8 @@ namespace Recognizer.Recognition
 			}
 
 			Debug.WriteLine($"Label:{label}, this is {name}. Confidence is {confidence}");
+
+			OnFaceRecognized(new FaceRecognizedEventArgs(name));
 
 			return label;
 		}
