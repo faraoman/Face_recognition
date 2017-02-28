@@ -44,12 +44,12 @@ namespace Recognizer
 			InitializeComponent();
 			this.FormClosing += OnMainFormClosing;
 
-			_frame = new Frame(3, 3, 100, 50, Color.Coral);
-			_frame.Locked = true;
+			//_frame = new Frame(3, 3, 100, 50, Color.Coral);
+			//_frame.Locked = true;
 
-			_frameImage.Frames.Add(_frame);
+			//_frameImage.Frames.Add(_frame);
 
-			_frame.Visible = true;
+			//_frame.Visible = true;
 			/**
 			_videoSourceProvider = videoSourceProvider;
 			_videoSource = videoSource;
@@ -148,7 +148,8 @@ namespace Recognizer
 				_frameImage.InvalidateCache();
 			});
 
-			_frameImage.BeginInvoke(mi);
+			if(_frameImage.InvokeRequired)
+				_frameImage.BeginInvoke(mi);
 
 			/**/
 			if(_frameCounter >= _skipFrames)
@@ -159,8 +160,18 @@ namespace Recognizer
 				//пытаемся распознать человека FaceRecognizer'ом
 				//_faceDetector.DetectFaces();
 				//_faceDetector.DrawFaceRectangles();
+				_faceDetector.UpdateImages(_matrix.CreateBitmap());
+				var rects = _faceDetector.DetectFaces();
 
-				/*await*/ FaceProcessingAsync(/*_faceDetector.FacesRepository*/);
+				if(_frameImage.InvokeRequired)
+				{
+					_frameImage.BeginInvoke(new MethodInvoker(() =>
+					{
+						DrawRectangles(rects);
+					}));
+				}
+				/*await*/
+				FaceProcessingAsync(/*_faceDetector.FacesRepository*/);
 				
 				_frameCounter = 0;
 			}
@@ -221,16 +232,27 @@ namespace Recognizer
 			}
 		}
 
-		private Task FaceProcessingAsync(/*List<Mat> faces*/)
+		private void DrawRectangles(Rect[] rectangles)
 		{
-			return Task.Run(() =>
+			_frameImage.Frames.Clear();
+			foreach(var rect in rectangles)
 			{
+				_frameImage.Frames.Add(new Frame(rect.X, rect.Y, rect.Width, rect.Height)
+				{
+					Locked = true,
+					Visible = true
+				});
+			}
+			_frameImage.InvalidateCache();
+		}
+
+		private void FaceProcessingAsync(/*List<Mat> faces*/)
+		{
+			
 				//var detector = new FaceDetector(openFile.FileName);
 				lock(facesLock)
 				{
-					_faceDetector.UpdateImages(_matrix.CreateBitmap());
-					_faceDetector.DetectFaces();
-					_faceDetector.DrawFaceRectangles();
+					
 
 					LBPFaceRecognizer recognizer = new LBPFaceRecognizer();
 
@@ -282,7 +304,7 @@ namespace Recognizer
 						//MessageBox.Show(resultStr, "Recognizer", MessageBoxButtons.OK);
 					} 
 				}
-			});
+			
 		}
 
 		private void OnButtonTestCamera_Click(object sender, EventArgs e)
