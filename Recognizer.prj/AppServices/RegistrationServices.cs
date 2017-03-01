@@ -53,24 +53,29 @@ namespace Recognizer
 				.SingleInstance()
 				.As<VideoImage>();
 
-			var videoSourceProvider = new IPCameraSourceProvider();
-			var configuration = videoSourceProvider.TryGetConfiguration();
-			var videoSource = videoSourceProvider.CreateVideoSource();
+			//var videoSourceProvider = new IPCameraSourceProvider();
+			//var configuration = videoSourceProvider.TryGetConfiguration();
+			//var videoSource = videoSourceProvider.CreateVideoSource();
 
 			containerBuilder
-				.RegisterInstance(videoSourceProvider)
-				.As<IVideoSourceProvider>();
+				.RegisterType<Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider>()
+				.As<IVideoSourceProvider>()
+				.SingleInstance();
+
+			//containerBuilder
+			//	.RegisterInstance(new VideoSourceConfiguration(videoSource, configuration))
+			//	.As<ISerializableConfiguration>();
+
+			//containerBuilder
+			//	.RegisterInstance(videoSource)
+			//	.As<IVideoSource>();
 
 			containerBuilder
-				.RegisterInstance(new VideoSourceConfiguration(videoSource, configuration))
-				.As<ISerializableConfiguration>();
+				.RegisterType<RecognitionLogController>()
+				.AsSelf();
 
 			containerBuilder
-				.RegisterInstance(videoSource)
-				.As<IVideoSource>();
-
-			containerBuilder.RegisterModule<ConfigurationModule>();
-			containerBuilder.RegisterModule<DatabaseModule>();
+				.RegisterAssemblyModules(typeof(RegistrationServices).Assembly);
 
 			return containerBuilder.Build();
 		}

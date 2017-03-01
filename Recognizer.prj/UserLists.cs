@@ -15,7 +15,7 @@ namespace Recognizer
 {
 	public partial class UserLists : Form
 	{
-		private IContainer _container;
+		private IComponentContext _container;
 
 		public UserLists()
 		{
@@ -23,7 +23,7 @@ namespace Recognizer
 			Font = SystemFonts.MessageBoxFont;
 		}
 
-		public UserLists(IContainer container)
+		public UserLists(IComponentContext container)
 		{
 			InitializeComponent();
 			Font = SystemFonts.MessageBoxFont;

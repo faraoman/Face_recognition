@@ -41,13 +41,18 @@
 			this.базаДанныхToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.спискиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this._lblExecutingProtocol = new System.Windows.Forms.Label();
-			this._listView = new System.Windows.Forms.ListView();
+			this.dataGridView1 = new System.Windows.Forms.DataGridView();
+			this.Time = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this._colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.Estimate = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.menuStrip1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// _btnTestOpenCV
 			// 
-			this._btnTestOpenCV.Location = new System.Drawing.Point(506, 440);
+			this._btnTestOpenCV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this._btnTestOpenCV.Location = new System.Drawing.Point(680, 428);
 			this._btnTestOpenCV.Name = "_btnTestOpenCV";
 			this._btnTestOpenCV.Size = new System.Drawing.Size(132, 23);
 			this._btnTestOpenCV.TabIndex = 0;
@@ -57,7 +62,8 @@
 			// 
 			// _btnTestCamera
 			// 
-			this._btnTestCamera.Location = new System.Drawing.Point(506, 469);
+			this._btnTestCamera.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this._btnTestCamera.Location = new System.Drawing.Point(680, 457);
 			this._btnTestCamera.Name = "_btnTestCamera";
 			this._btnTestCamera.Size = new System.Drawing.Size(132, 23);
 			this._btnTestCamera.TabIndex = 1;
@@ -67,24 +73,31 @@
 			// 
 			// _logView
 			// 
+			this._logView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._logView.AppenderName = "root";
 			this._logView.Location = new System.Drawing.Point(2, 549);
 			this._logView.Name = "_logView";
-			this._logView.Size = new System.Drawing.Size(739, 155);
+			this._logView.Size = new System.Drawing.Size(810, 155);
 			this._logView.TabIndex = 3;
 			// 
-			// _videoImage
+			// _frameImage
 			// 
+			this._frameImage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._frameImage.CoordsFont = new System.Drawing.Font("Verdana", 8F);
 			this._frameImage.FooterFont = new System.Drawing.Font("Courier New", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
 			this._frameImage.FPSFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
 			this._frameImage.Location = new System.Drawing.Point(0, 27);
-			this._frameImage.Name = "_videoImage";
+			this._frameImage.Name = "_frameImage";
 			this._frameImage.Size = new System.Drawing.Size(500, 500);
 			this._frameImage.TabIndex = 4;
 			// 
 			// _btnTestBtn
 			// 
-			this._btnTestBtn.Location = new System.Drawing.Point(506, 499);
+			this._btnTestBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this._btnTestBtn.Location = new System.Drawing.Point(680, 487);
 			this._btnTestBtn.Name = "_btnTestBtn";
 			this._btnTestBtn.Size = new System.Drawing.Size(132, 23);
 			this._btnTestBtn.TabIndex = 5;
@@ -95,11 +108,11 @@
 			// menuStrip1
 			// 
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.сервисToolStripMenuItem,
-			this.базаДанныхToolStripMenuItem});
+            this.сервисToolStripMenuItem,
+            this.базаДанныхToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(747, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(817, 24);
 			this.menuStrip1.TabIndex = 6;
 			this.menuStrip1.Text = "menuStrip1";
 			this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
@@ -107,9 +120,9 @@
 			// сервисToolStripMenuItem
 			// 
 			this.сервисToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.настройкиToolStripMenuItem,
-			this.toolStripMenuItem1,
-			this.выходToolStripMenuItem});
+            this.настройкиToolStripMenuItem,
+            this.toolStripMenuItem1,
+            this.выходToolStripMenuItem});
 			this.сервисToolStripMenuItem.Name = "сервисToolStripMenuItem";
 			this.сервисToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
 			this.сервисToolStripMenuItem.Text = "Сервис";
@@ -140,7 +153,7 @@
 			// базаДанныхToolStripMenuItem
 			// 
 			this.базаДанныхToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-			this.спискиToolStripMenuItem});
+            this.спискиToolStripMenuItem});
 			this.базаДанныхToolStripMenuItem.Name = "базаДанныхToolStripMenuItem";
 			this.базаДанныхToolStripMenuItem.Size = new System.Drawing.Size(86, 20);
 			this.базаДанныхToolStripMenuItem.Text = "База данных";
@@ -154,6 +167,8 @@
 			// 
 			// _lblExecutingProtocol
 			// 
+			this._lblExecutingProtocol.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._lblExecutingProtocol.AutoSize = true;
 			this._lblExecutingProtocol.Location = new System.Drawing.Point(3, 532);
 			this._lblExecutingProtocol.Name = "_lblExecutingProtocol";
@@ -161,21 +176,52 @@
 			this._lblExecutingProtocol.TabIndex = 7;
 			this._lblExecutingProtocol.Text = "Протокол работы программы:";
 			// 
-			// _listView
+			// dataGridView1
 			// 
-			this._listView.Location = new System.Drawing.Point(506, 27);
-			this._listView.Name = "_listView";
-			this._listView.Size = new System.Drawing.Size(235, 407);
-			this._listView.TabIndex = 8;
-			this._listView.UseCompatibleStateImageBehavior = false;
+			this.dataGridView1.AllowUserToAddRows = false;
+			this.dataGridView1.AllowUserToDeleteRows = false;
+			this.dataGridView1.AllowUserToResizeRows = false;
+			this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+			this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Time,
+            this._colName,
+            this.Estimate});
+			this.dataGridView1.Location = new System.Drawing.Point(506, 27);
+			this.dataGridView1.Name = "dataGridView1";
+			this.dataGridView1.ReadOnly = true;
+			this.dataGridView1.RowHeadersVisible = false;
+			this.dataGridView1.Size = new System.Drawing.Size(306, 395);
+			this.dataGridView1.TabIndex = 8;
+			// 
+			// Time
+			// 
+			this.Time.HeaderText = "Дата/время";
+			this.Time.Name = "Time";
+			this.Time.ReadOnly = true;
+			// 
+			// _colName
+			// 
+			this._colName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+			this._colName.DataPropertyName = "Record";
+			this._colName.HeaderText = "ФИО";
+			this._colName.Name = "_colName";
+			this._colName.ReadOnly = true;
+			// 
+			// Estimate
+			// 
+			this.Estimate.HeaderText = "Уверенность";
+			this.Estimate.Name = "Estimate";
+			this.Estimate.ReadOnly = true;
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Control;
-			this.ClientSize = new System.Drawing.Size(747, 707);
-			this.Controls.Add(this._listView);
+			this.ClientSize = new System.Drawing.Size(817, 707);
+			this.Controls.Add(this.dataGridView1);
 			this.Controls.Add(this._lblExecutingProtocol);
 			this.Controls.Add(this._btnTestBtn);
 			this.Controls.Add(this._frameImage);
@@ -189,6 +235,7 @@
 			this.Text = "MainForm";
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -209,6 +256,9 @@
 		private System.Windows.Forms.ToolStripMenuItem спискиToolStripMenuItem;
 		private System.Windows.Forms.Label _lblExecutingProtocol;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-		public System.Windows.Forms.ListView _listView;
+		private System.Windows.Forms.DataGridView dataGridView1;
+		private System.Windows.Forms.DataGridViewTextBoxColumn _colName;
+		private System.Windows.Forms.DataGridViewTextBoxColumn Time;
+		private System.Windows.Forms.DataGridViewTextBoxColumn Estimate;
 	}
 }

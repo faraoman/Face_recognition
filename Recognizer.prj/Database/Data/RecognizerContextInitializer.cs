@@ -8,7 +8,7 @@ namespace Recognizer.Database
 	{
 		protected override void Seed(RecognizerContext context)
 		{
-			var employees = new List<Employee>()
+			var employees = new[]
 			{
 				new Employee
 				{

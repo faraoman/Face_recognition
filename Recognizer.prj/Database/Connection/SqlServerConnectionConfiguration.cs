@@ -43,10 +43,13 @@ namespace Recognizer.Database
 
 			sb.InitialCatalog = DatabaseName;
 			sb.DataSource = Hostname;
-			sb.AttachDBFilename = AttachedDbFileName;
+			//sb.AttachDBFilename = AttachedDbFileName;
 			sb.IntegratedSecurity = AuthType == AuthType.Windows;
-			sb.UserID = Username;
-			sb.Password = Password;
+			if(AuthType == AuthType.Server)
+			{
+				sb.UserID = Username;
+				sb.Password = Password;
+			}
 
 			return sb.ToString();
 		}
@@ -72,7 +75,7 @@ namespace Recognizer.Database
 		{
 			public const string DatabaseName = "FaceRecognizer";
 
-			public const string Hostname = @"(localdb)\mssqllocaldb";
+			public const string Hostname = @"(local)\SQLEXPRESS";
 
 			public static readonly string AttachedDbFileName = Path.Combine(Services.DatabaseDirectory.FullPath, "FaceRecognizer.mdf");
 

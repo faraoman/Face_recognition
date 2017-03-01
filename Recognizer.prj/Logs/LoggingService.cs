@@ -1,6 +1,7 @@
 ﻿using System;
 using Mallenom;
 using Mallenom.AppServices;
+using Mallenom.Diagnostics.Logs;
 
 namespace Recognizer.Logs
 {
@@ -44,6 +45,7 @@ namespace Recognizer.Logs
 
 		private void Initialize()
 		{
+			LogManager.GetRepository().RootLogger.AddAppender(new LogViewAppender());
 			Directory.EnsureExists();
 			WriteStartupMessages();
 		}
