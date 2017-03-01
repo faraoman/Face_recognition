@@ -201,11 +201,11 @@ namespace Recognizer.Detector
 		/// <summary>
 		/// Обновляет свойства InputMatrix и OutputMatrix новыми значениями, полученными из colorMatrix. 
 		/// </summary>
-		public void UpdateImages(ColorMatrix colorMatrix)
+		public void UpdateImages(IImageMatrix colorMatrix)
 		{
 			if(colorMatrix != null)
 			{
-				InputMatrix = ColorMatrixExtensions.ToMat(colorMatrix);
+				InputMatrix = colorMatrix.ToMat();
 				OutputMatrix = InputMatrix.Clone();
 			}
 		}

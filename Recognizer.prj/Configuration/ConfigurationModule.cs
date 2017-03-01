@@ -59,6 +59,14 @@ namespace Recognizer
 				.Named<IApplicationProfileDirectory>(@"configuration")
 				.SingleInstance();
 
+			builder.Register(
+				context => context
+					.Resolve<IApplicationProfileService>()
+					.LocalMachine
+					.RegisterDirectory(@"Database", ApplicationProfileDirectoryUsage.Database))
+				.Named<IApplicationProfileDirectory>(@"database")
+				.SingleInstance();
+
 			builder.RegisterSerializableConfiguration("Core", "TestParameters", TestParameters.Serializer, TestParameters.Defaults);
 
 			builder

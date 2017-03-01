@@ -155,8 +155,9 @@
     <Compile Include="..\shared\external\Verify.cs">
       <Link>shared\Verify.cs</Link>
     </Compile>
-    <Compile Include="AppBootstrapper.cs" />
-    <Compile Include="AppCriticalServices.cs" />
+    <Compile Include="AppServices\AppBootstrapper.cs" />
+    <Compile Include="AppServices\AppCriticalServices.cs" />
+    <Compile Include="AppServices\IAppBootstrapper.cs" />
     <Compile Include="Configuration\ConfigurationModule.cs" />
     <Compile Include="Configuration\VideoSourceConfiguration.cs" />
     <Compile Include="Database\EmployeesLogRepository.cs" />
@@ -168,7 +169,7 @@
     <Compile Include="Database\Connection\IDbConnectionFactory.cs" />
     <Compile Include="Database\Connection\SqlServerConnectionConfiguration.cs" />
     <Compile Include="Database\Connection\SqlServerConnectionFactory.cs" />
-    <Compile Include="Detector\ColorMatrixExtensions.cs" />
+    <Compile Include="Detector\ImageMatrixExtensions.cs" />
     <Compile Include="Detector\FaceDetector.cs" />
     <Compile Include="Detector\MatExtensions.cs" />
     <Compile Include="Entities\Employee.cs" />
@@ -186,8 +187,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Recognition\LBPFaceRecognizer.cs" />
-    <Compile Include="RegistrationServices.cs" />
-    <Compile Include="Services.cs" />
+    <Compile Include="AppServices\RegistrationServices.cs" />
+    <Compile Include="AppServices\Services.cs" />
     <Compile Include="TestForm.cs">
       <SubType>Form</SubType>
     </Compile>

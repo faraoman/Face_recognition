@@ -1,6 +1,9 @@
 ﻿using System.Data.Entity;
 using Autofac;
 
+using Recognizer.Database.Data;
+using Recognizer.Entities;
+
 namespace Recognizer.Database
 {
 	class DatabaseModule : Autofac.Module
@@ -18,8 +21,24 @@ namespace Recognizer.Database
 				.As<DbContext>();
 
 			builder
+				.RegisterType<RecognizerContextInitializer>()
+				.As<IDatabaseInitializer<RecognizerContext>>();
+
+			builder
 				.RegisterType<SqlServerConnectionConfiguration>()
 				.As<IConnectionStringProvider>();
+
+			builder
+				.RegisterType<Employee>()
+				.AsSelf();
+
+			builder
+				.RegisterType<EmployeesLogRepository>()
+				.AsSelf();
+
+			builder
+				.RegisterType<EmployeesLogRepositoryFilter>()
+				.AsSelf();
 		}
 	}
 }

@@ -30,12 +30,13 @@
 		{
 			this.listBox1 = new System.Windows.Forms.ListBox();
 			this._btnShowEmployees = new System.Windows.Forms.Button();
+			this._btnAddEmployee = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// listBox1
 			// 
 			this.listBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-			| System.Windows.Forms.AnchorStyles.Left)));
+            | System.Windows.Forms.AnchorStyles.Left)));
 			this.listBox1.Cursor = System.Windows.Forms.Cursors.Arrow;
 			this.listBox1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.listBox1.FormattingEnabled = true;
@@ -56,12 +57,23 @@
 			this._btnShowEmployees.UseVisualStyleBackColor = true;
 			this._btnShowEmployees.Click += new System.EventHandler(this._btnShowEmployees_Click);
 			// 
+			// _btnAddEmployee
+			// 
+			this._btnAddEmployee.Location = new System.Drawing.Point(383, 35);
+			this._btnAddEmployee.Name = "_btnAddEmployee";
+			this._btnAddEmployee.Size = new System.Drawing.Size(179, 23);
+			this._btnAddEmployee.TabIndex = 2;
+			this._btnAddEmployee.Text = "Добавить сотрудника";
+			this._btnAddEmployee.UseVisualStyleBackColor = true;
+			this._btnAddEmployee.Click += new System.EventHandler(this._btnAddEmployee_Click);
+			// 
 			// UserLists
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
 			this.ClientSize = new System.Drawing.Size(574, 511);
+			this.Controls.Add(this._btnAddEmployee);
 			this.Controls.Add(this._btnShowEmployees);
 			this.Controls.Add(this.listBox1);
 			this.Name = "UserLists";
@@ -77,5 +89,6 @@
 
 		private System.Windows.Forms.ListBox listBox1;
 		private System.Windows.Forms.Button _btnShowEmployees;
+		private System.Windows.Forms.Button _btnAddEmployee;
 	}
 }

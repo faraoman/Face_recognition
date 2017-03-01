@@ -6,6 +6,10 @@ using Mallenom.Video;
 using Recognizer.Configuration;
 using Mallenom.AppServices;
 using Recognizer.Logs;
+using Recognizer.AppServices;
+using Recognizer.Detector;
+using Recognizer.Recognition;
+using Mallenom.Imaging;
 
 namespace Recognizer
 {
@@ -22,7 +26,7 @@ namespace Recognizer
 			containerBuilder
 				.RegisterType<AppBootstrapper>()
 				.SingleInstance()
-				.AsSelf();
+				.As<IAppBootstrapper>();
 
 			containerBuilder
 				.RegisterType<DatabaseService>()
@@ -33,6 +37,21 @@ namespace Recognizer
 				.RegisterType<LoggingService>()
 				.SingleInstance()
 				.AsSelf();
+
+			containerBuilder
+				.RegisterType<FaceDetector>()
+				.SingleInstance()
+				.AsSelf();
+
+			containerBuilder
+				.RegisterType<LBPFaceRecognizer>()
+				.SingleInstance()
+				.AsSelf();
+
+			containerBuilder
+				.RegisterType<FrameImage>()
+				.SingleInstance()
+				.As<VideoImage>();
 
 			var videoSourceProvider = new IPCameraSourceProvider();
 			var configuration = videoSourceProvider.TryGetConfiguration();

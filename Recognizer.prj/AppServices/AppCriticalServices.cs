@@ -44,6 +44,12 @@ namespace Recognizer
 				.RegisterInstance(_dbDirectory)
 				.Named<IApplicationProfileDirectory>("database")
 				.ExternallyOwned();
+
+			var logger = new Logger(_logsDirectory);
+
+			builder
+				.RegisterInstance(logger)
+				.As<ILog>();
 		}
 	}
 }
