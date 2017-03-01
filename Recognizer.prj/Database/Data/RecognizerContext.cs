@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using Mallenom;
@@ -8,9 +9,7 @@ namespace Recognizer.Database
 {
 	public sealed class RecognizerContext : DbContext
 	{
-
-		public RecognizerContext()
-			: base("FaceRecognizer")
+		static RecognizerContext()
 		{
 			System
 				.Data
@@ -19,14 +18,9 @@ namespace Recognizer.Database
 				.SetInitializer(new RecognizerContextInitializer());
 		}
 
-		public RecognizerContext(IDbConnectionFactory connectionFactory, bool contextOwnsConnection = true)
-			: base (connectionFactory.CreateConnection(), contextOwnsConnection)
+		public RecognizerContext(DbConnection dbConnection, bool contextOwnsConnection = true)
+			: base (dbConnection, contextOwnsConnection)
 		{
-			System
-				.Data
-				.Entity
-				.Database
-				.SetInitializer(new RecognizerContextInitializer());
 		}
 
 		public DbSet<Employee> Employees { get; set; }

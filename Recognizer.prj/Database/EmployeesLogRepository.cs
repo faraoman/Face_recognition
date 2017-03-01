@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Recognizer.Entities;
 
+using Mallenom;
+
 namespace Recognizer.Database.Data
 {
 	/// <summary> Класс, достающий из базы данных записи <seealso cref="EmployeesLogRecord"/> по фильтру <see cref="EmployeesLogRepositoryFilter"/></summary>
@@ -12,26 +14,29 @@ namespace Recognizer.Database.Data
 	{
 		#region .ctor
 
-		public EmployeesLogRepository(IDbConnectionFactory dbConnectionFactory)
+		public EmployeesLogRepository(IDbContextFactory dbContextFactory)
 		{
-			DbConnectionFactory = dbConnectionFactory;
+			Verify.Argument.IsNotNull(dbContextFactory, nameof(dbContextFactory));
+
+			DbContextFactory = dbContextFactory;
 		}
 
 		#endregion
 
 		#region Properties
 
-		IDbConnectionFactory DbConnectionFactory { get; }
+		IDbContextFactory DbContextFactory { get; }
+
 		#endregion
 
 		#region Methods
 
 		public void AddRecord(Employee employee)
 		{
-			using(var dbContext = new RecognizerContext(DbConnectionFactory, contextOwnsConnection: true))
+			using(var dbContext = DbContextFactory.CreateContext())
 			{
 				dbContext
-					.Employees
+					.Set<Employee>()
 					.Add(employee);
 
 				dbContext.SaveChanges();
@@ -44,11 +49,10 @@ namespace Recognizer.Database.Data
 		{
 			var records = new List<EmployeesLogRecord>();
 
-			using(var dbContext = new RecognizerContext(DbConnectionFactory, contextOwnsConnection: true))
+			using(var dbContext = DbContextFactory.CreateContext())
 			{
 				var employees = dbContext
-					.Employees
-					.Select(e => e)
+					.Set<Employee>()
 					.ToList();
 
 				foreach(var employee in employees)
@@ -57,7 +61,6 @@ namespace Recognizer.Database.Data
 					{
 						Record = $"{employee.LastName} {employee.FirstName} {employee.Patronymic}"
 					});
-
 				}
 			}
 
@@ -71,20 +74,20 @@ namespace Recognizer.Database.Data
 		{
 			var records = new List<EmployeesLogRecord>();
 
-			using(var dbContext = new RecognizerContext(DbConnectionFactory, contextOwnsConnection: true))
+			using(var dbContext = DbContextFactory.CreateContext())
 			{
 				var employees = dbContext
-					.Employees
+					.Set<Employee>()
 					.Where(e => e.PersonLabel == filter.PersonLabel)
 					.ToList();
 
 				foreach(var employee in employees)
 				{
-					records.Add(new EmployeesLogRecord
-					{
-						Record = $"{employee.LastName} {employee.FirstName} {employee.Patronymic}"
-					});
-
+					records.Add(
+						new EmployeesLogRecord
+						{
+							Record = $"{employee.LastName} {employee.FirstName} {employee.Patronymic}"
+						});
 				}
 			}
 
@@ -98,10 +101,7 @@ namespace Recognizer.Database.Data
 	{
 		public string Record { get; set; }
 
-		public override string ToString()
-		{
-			return Record;
-		}
+		public override string ToString() => Record;
 	}
 
 	/// <summary> Фильтр записей из базы данных по метке <paramref name="PersonLabel"/>. </summary>

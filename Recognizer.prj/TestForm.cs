@@ -34,24 +34,24 @@ namespace Recognizer
 				PersonLabel = 3
 			};
 
-			try
-			{
-				var context = new RecognizerContext();
+			//try
+			//{
+			//	var context = new RecognizerContext();
 
-				var employees = context
-					.Set<Employee>()
-					.ToList();
+			//	var employees = context
+			//		.Set<Employee>()
+			//		.ToList();
 
-				context
-					.Set<Employee>()
-					.RemoveRange(employees);
+			//	context
+			//		.Set<Employee>()
+			//		.RemoveRange(employees);
 
-				context.SaveChanges();
-			}
-			catch(Exception exc)
-			{
-				Log.Error("Database initialization error", exc);
-			}
+			//	context.SaveChanges();
+			//}
+			//catch(Exception exc)
+			//{
+			//	Log.Error("Database initialization error", exc);
+			//}
 		}
 	}
 }

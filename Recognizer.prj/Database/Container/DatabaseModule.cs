@@ -39,6 +39,23 @@ namespace Recognizer.Database
 			builder
 				.RegisterType<EmployeesLogRepositoryFilter>()
 				.AsSelf();
+
+			builder
+				.RegisterType<DbContextFactory>()
+				.As<IDbContextFactory>()
+				//.OnActivating(c =>
+				//{
+				//	using(var context = c.Instance.CreateContext())
+				//	{
+				//		context.Database.CreateIfNotExists();
+				//	}
+				//})
+				.SingleInstance();
+
+			builder
+				.RegisterType<EmployeesLogRepository>()
+				.AsSelf()
+				.SingleInstance();
 		}
 	}
 }

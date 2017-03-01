@@ -19,12 +19,14 @@ using Recognizer.Detector;
 using Recognizer.Recognition;
 using Recognizer.Logs;
 
+using Mallenom;
+
 //Написать фейковый класс, который вернул бы какие-то записи из БД (Для Сони).
 namespace Recognizer
 {
 	public partial class MainForm : Form
 	{
-		private IContainer _container;
+		private IComponentContext _container;
 
 		private IVideoSourceProvider _videoSourceProvider;
 		private IVideoSource _videoSource;
@@ -33,8 +35,12 @@ namespace Recognizer
 		private FaceDetector _detector;
 		private LBPFaceRecognizer _recognizer;
 
-		public MainForm(IContainer container)
+		private RecognitionLogController _recognitionLogController;
+
+		public MainForm(IComponentContext container)
 		{
+			Verify.Argument.IsNotNull(container, nameof(container));
+
 			InitializeComponent();
 			this.FormClosing += OnMainFormClosing;
 
@@ -44,10 +50,8 @@ namespace Recognizer
 			InitializeRecognizer();
 			InitializeVideoSource();
 
-			using(var context = _container.Resolve<DbContext>())
-			{
-				context.Database.CreateIfNotExists();
-			}
+			_recognitionLogController = container.Resolve<RecognitionLogController>();
+			_recognitionLogController.DataGridView = dataGridView1;
 
 			//oldest version by artemd
 			/**
@@ -104,7 +108,7 @@ namespace Recognizer
 		private void InitializeVideoSource()
 		{
 			_videoSourceProvider = _container.Resolve<IVideoSourceProvider>();
-			_videoSource         = _container.Resolve<IVideoSource>();
+			_videoSource         = _videoSourceProvider.CreateVideoSource();
 
 			_matrix              = new ColorMatrix();
 
@@ -113,16 +117,22 @@ namespace Recognizer
 			_frameImage.SizeMode                  = ImageSizeMode.Zoom;
 
 			/*Вставка видео*/
-			var c = new FFmpegVideoSource();
-			c.RepeatAfterMediaEnded = true;
-			c.StreamUrl = "testing_video.avi";
-			c.AttachMatrix(_matrix);
-			_videoSource = c;
-			/**/
+			//var c = new FFmpegVideoSource();
+			//c.RepeatAfterMediaEnded = true;
+			//c.StreamUrl = "testing_video.avi";
+			//c.AttachMatrix(_matrix);
+
+			_videoSource.AttachMatrix(_matrix);
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
 
-			_videoSource.Open();
-			_videoSource.Start();
+			try
+			{
+				_videoSource.Open();
+				_videoSource.Start();
+			}
+			catch
+			{
+			}
 		}
 
 		private void OnMainFormClosing(object sender, FormClosingEventArgs e)
@@ -134,19 +144,36 @@ namespace Recognizer
 			}
 		}
 
-
 		private int _frameCounter;
 		private int _skipFrames = 15;
 
-		private /*async*/ void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
+		private void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
 		{
-			MethodInvoker mi = new MethodInvoker(()=>
+			var mi = new MethodInvoker(()=>
 			{
-				_frameImage.InvalidateCache();
+				if(!IsDisposed)
+				{
+					_frameImage.InvalidateCache();
+				}
 			});
 
 			if(_frameImage.InvokeRequired)
-				_frameImage.BeginInvoke(mi);
+			{
+				if(!IsDisposed)
+				{
+					try
+					{
+						_frameImage.BeginInvoke(mi);
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
+			}
+			else
+			{
+				mi();
+			}
 
 			/**/
 			if(_frameCounter >= _skipFrames)
@@ -396,7 +423,8 @@ namespace Recognizer
 			{
 				if(setupForm.ShowDialog(this) == DialogResult.OK)
 				{
-					_videoSource.Stop();
+					_videoSource.Close();
+					_videoSource.Open();
 					_videoSource.Start();
 				}
 			}

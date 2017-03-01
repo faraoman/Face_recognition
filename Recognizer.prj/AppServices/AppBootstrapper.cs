@@ -9,13 +9,8 @@ namespace Recognizer
 {
 	public sealed class AppBootstrapper : IAppBootstrapper
 	{
-		IVideoSourceProvider _videoSourceProvider;
-		IVideoSource _videoSource;
-
-		public AppBootstrapper(IVideoSourceProvider videoSourceProvider, IVideoSource videoSource)
+		public AppBootstrapper()
 		{
-			_videoSourceProvider = videoSourceProvider;
-			_videoSource = videoSource;
 		}
 
 		public IContainer Container { get; set; }
