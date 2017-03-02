@@ -194,13 +194,25 @@ namespace Recognizer
 
 				var rects = _detector.DetectFaces();
 
+				mi = new MethodInvoker(() => DrawRectangles(rects));
 				if(_frameImage.InvokeRequired)
 				{
-					_frameImage.BeginInvoke(new MethodInvoker(() =>
+					if(!IsDisposed)
 					{
-						DrawRectangles(rects);
-					}));
+						try
+						{
+							_frameImage.BeginInvoke(mi);
+						}
+						catch(ObjectDisposedException)
+						{
+						}
+					}
 				}
+				else
+				{
+					mi();
+				}
+
 				/*await*/
 				FaceProcessing(/*_detector.FacesRepository*/);
 				
