@@ -57,10 +57,13 @@ namespace Recognizer
 			//var configuration = videoSourceProvider.TryGetConfiguration();
 			//var videoSource = videoSourceProvider.CreateVideoSource();
 
+			//для видеозаписей из файла на диске
+			/**/
 			containerBuilder
 				.RegisterType<Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider>()
 				.As<IVideoSourceProvider>()
 				.SingleInstance();
+			/**/
 
 			//containerBuilder
 			//	.RegisterInstance(new VideoSourceConfiguration(videoSource, configuration))

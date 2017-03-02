@@ -96,6 +96,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libs\mallenom.video.dll</HintPath>
     </Reference>
+    <Reference Include="mallenom.video.dshow">
+      <HintPath>..\Libs\mallenom.video.dshow.dll</HintPath>
+    </Reference>
     <Reference Include="mallenom.video.ffmpeg">
       <HintPath>..\Libs\mallenom.video.ffmpeg.dll</HintPath>
     </Reference>
