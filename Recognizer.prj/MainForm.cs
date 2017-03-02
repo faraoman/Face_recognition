@@ -20,6 +20,8 @@ using Recognizer.Recognition;
 using Recognizer.Logs;
 
 using Mallenom;
+using Mallenom.DShow;
+using Mallenom.Video.DirectShow;
 
 //Написать фейковый класс, который вернул бы какие-то записи из БД (Для Сони).
 namespace Recognizer
@@ -122,6 +124,10 @@ namespace Recognizer
 			//c.StreamUrl = "testing_video.avi";
 			//c.AttachMatrix(_matrix);
 
+			//current
+			var cur = new DXCaptureSource();
+			_videoSource = cur;
+
 			_videoSource.AttachMatrix(_matrix);
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
 
@@ -145,7 +151,7 @@ namespace Recognizer
 		}
 
 		private int _frameCounter;
-		private int _skipFrames = 15;
+		private int _skipFrames = 5;
 
 		private void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
 		{
@@ -292,13 +298,40 @@ namespace Recognizer
 			_frameImage.Frames.Clear();
 			foreach(var rect in rectangles)
 			{
-				_frameImage.Frames.Add(new Frame(rect.X, rect.Y, rect.Width, rect.Height)
+				Rect rect_ = Shakalization(rect);
+
+				_frameImage.Frames.Add(new Frame(rect_.X, rect_.Y, rect_.Width, rect_.Height)
 				{
 					Locked = true,
 					Visible = true
 				});
 			}
 			_frameImage.InvalidateCache();
+		}
+
+		private Rect Shakalization(Rect rect)
+		{
+			int frameWidth		= _frameImage.Matrix.Width,
+				frameHeigth		= _frameImage.Matrix.Height,
+				componentWidth	= _frameImage.Width,
+				componentHeigth = _frameImage.Height;
+
+
+
+			double shakalizationFactor = (double) componentWidth / frameWidth;
+
+
+			int shiftY = (int) (componentHeigth - (frameHeigth*shakalizationFactor)) / 2;
+
+			rect.X = (int) (rect.X * shakalizationFactor);
+			rect.Y = (int) ((rect.Y * shakalizationFactor)+shiftY);
+
+
+			rect.Width = (int) (rect.Width * shakalizationFactor);
+			rect.Height = (int)(rect.Height * shakalizationFactor);
+
+
+			return rect;
 		}
 
 		private void FaceProcessing()
