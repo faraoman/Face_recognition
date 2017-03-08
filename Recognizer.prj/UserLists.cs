@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Autofac;
+using Mallenom.Video;
+using OpenCvSharp;
+using OpenCvSharp.CPlusPlus;
 using Recognizer.Database;
 using Recognizer.Database.Data;
 using Recognizer.Entities;
@@ -73,23 +77,22 @@ namespace Recognizer
 
 		private void _btnAddEmployee_Click(object sender, EventArgs e)
 		{
-			//try
-			//{
-			//	var employeeLogRepository = _container.Resolve<EmployeesLogRepository>();
-			//	var vasya = new Employee
-			//	{
-			//		FirstName = "Вася",
-			//		LastName = "Пупкин",
-			//		Patronymic = "Петрович",
-			//		PersonLabel = 5
-			//	};
+			using(var addEmployee = new AddNewEmployeeForm())
+			{
+				if(addEmployee.ShowDialog(this) == DialogResult.OK)
+				{
+					try
+					{
+						Debug.WriteLine("AddEmployeeForm created OK");
 
-			//	employeeLogRepository.AddRecord(vasya);
-			//}
-			//catch(Exception exc)
-			//{
-			//	Log.Error("Database initialization error", exc);
-			//}
+					}
+					catch(Exception exc)
+					{
+						Log.Error("Database initialization error", exc);
+					}
+				}
+			}
+
 		}
 	}
 }

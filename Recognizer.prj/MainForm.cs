@@ -1,7 +1,5 @@
 ﻿using Autofac;
-
 using System;
-using System.Data.Entity;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
@@ -11,8 +9,6 @@ using Mallenom.Diagnostics.Logs;
 using Mallenom.Imaging;
 using Mallenom.Setup;
 using Mallenom.Video;
-using Mallenom.Video.DirectShow;
-using Mallenom.Video.FFmpeg;
 
 using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
@@ -493,10 +489,17 @@ namespace Recognizer
 
 		private void спискиToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			_videoSource.Stop();
+			_videoSource.Close();
+
 			using(var formLists = new UserLists(_container))
 			{
 				formLists.ShowDialog(this);
 			}
+
+			_videoSource.Open();
+			_videoSource.Start();
+
 		}
 
 		private void _btnTestVideoFromFile_Click(object sender, EventArgs e)

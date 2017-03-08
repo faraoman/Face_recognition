@@ -161,6 +161,12 @@
     <Compile Include="..\shared\external\Verify.cs">
       <Link>shared\Verify.cs</Link>
     </Compile>
+    <Compile Include="AddNewEmployeeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddNewEmployeeForm.Designer.cs">
+      <DependentUpon>AddNewEmployeeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AppServices\AppBootstrapper.cs" />
     <Compile Include="AppServices\AppCriticalServices.cs" />
     <Compile Include="AppServices\IAppBootstrapper.cs" />
@@ -210,6 +216,9 @@
     <Compile Include="UserLists.Designer.cs">
       <DependentUpon>UserLists.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AddNewEmployeeForm.resx">
+      <DependentUpon>AddNewEmployeeForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
