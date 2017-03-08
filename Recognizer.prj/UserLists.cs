@@ -77,7 +77,7 @@ namespace Recognizer
 
 		private void _btnAddEmployee_Click(object sender, EventArgs e)
 		{
-			using(var addEmployee = new AddNewEmployeeForm())
+			using(var addEmployee = new AddNewEmployeeForm(_container))
 			{
 				if(addEmployee.ShowDialog(this) == DialogResult.OK)
 				{

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ using Mallenom;
 using Mallenom.Diagnostics.Logs;
 using Mallenom.Imaging;
 using Mallenom.Video;
+using OpenCvSharp.CPlusPlus;
+using Recognizer.Database.Data;
 using Recognizer.Detector;
 using Recognizer.Recognition;
 
@@ -51,23 +54,224 @@ namespace Recognizer
 			Verify.Argument.IsNotNull(container, nameof(container));
 
 			InitializeComponent();
-			this.FormClosing += OnMainFormClosing;
+			this.FormClosing += OnAddNewEmployeeFormClosing;
 
 			_container = container;
 
-			// fixme
-			//var loggingService = _container.Resolve<ILoggingService>();
-			Log = LogManager.GetLog(typeof(LoggingService));
+			Log = _container.Resolve<ILog>();
 
 			InitializeRecognizer();
 			InitializeVideoSource();
-
-			_logView.Appender = new LogViewAppender();
-			_logView.Appender.DoAppend(new LogEvent(Level.Info, "Hello, bitch", new Exception(), DateTime.Now, "root"));
-
-			//_recognitionLogController = container.Resolve<RecognitionLogController>();
-			//_recognitionLogController.DataGridView = dataGridView1;
 		}
+		#endregion
+
+		#region Properties
+
+		ILog Log { get; }
+
+		#endregion
+
+		#region Methods
+		private void InitializeRecognizer()
+		{
+			_detector = _container.Resolve<FaceDetector>();
+			_recognizer = _container.Resolve<LBPFaceRecognizer>();
+
+			var trainDataPath = Path.Combine(
+						Directory.GetCurrentDirectory(),
+						"Samples",
+						"LBPFaces.xml");
+
+			_recognizer.Load(trainDataPath);
+
+			_recognizer.FaceRecognized += OnFaceRecognized;
+		}
+
+		private void InitializeVideoSource()
+		{
+			_videoSourceProvider = _container.Resolve<IVideoSourceProvider>();
+			_videoSource = _videoSourceProvider.CreateVideoSource();
+
+			_matrix = new ColorMatrix();
+
+			_frameImage.Matrix = _matrix;
+			_frameImage.ManualUpdateRendererCache = true;
+			_frameImage.SizeMode = ImageSizeMode.Zoom;
+
+			_videoSource.AttachMatrix(_matrix);
+			_videoSource.MatrixUpdated += OnMatrixUpdated;
+
+			try
+			{
+				_videoSource.Open();
+				_videoSource.Start();
+			}
+			catch
+			{
+			}
+		}
+
+		private void DrawRectangles(Rect[] rectangles)
+		{
+			_frameImage.Frames.Clear();
+			foreach(var rect in rectangles)
+			{
+				Rect rect_ = Shakalization(rect);
+
+				_frameImage.Frames.Add(new Frame(rect_.X, rect_.Y, rect_.Width, rect_.Height)
+				{
+					Locked = true,
+					Visible = true
+				});
+			}
+			_frameImage.InvalidateCache();
+		}
+
+
+		#endregion
+
+		#region EventHandlers
+
+		/// <summary> Обработчик события <see cref="LBPFaceRecognizer.FaceRecognized"/>. </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void OnFaceRecognized(object sender, FaceRecognizedEventArgs e)
+		{
+			try
+			{
+				var employeeLogRepository = _container.Resolve<EmployeesLogRepository>();
+				var filter = _container.Resolve<EmployeesLogRepositoryFilter>();
+				filter.PersonLabel = e.Label;
+
+				var employeeRecord = employeeLogRepository.FetchRecords(filter)[0];
+				var resultStr = "Распознан " + employeeRecord;
+
+				Log.Info(resultStr);
+			}
+			catch(Exception exc)
+			{
+				Log.Error("Ошибка в запросе к БД", exc);
+			}
+		}
+
+		private void OnAddNewEmployeeFormClosing(object sender, FormClosingEventArgs e)
+		{
+			if(_videoSource != null)
+			{
+				_videoSource.DetachAllMatrices();
+				_videoSource.MatrixUpdated -= OnMatrixUpdated;
+			}
+
+			_recognizer.FaceRecognized -= OnFaceRecognized;
+		}
+
+		private void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
+		{
+			var mi = new MethodInvoker(() =>
+			{
+				if(!IsDisposed)
+				{
+					_frameImage.InvalidateCache();
+				}
+			});
+
+			if(_frameImage.InvokeRequired)
+			{
+				if(!IsDisposed)
+				{
+					try
+					{
+						_frameImage.BeginInvoke(mi);
+					}
+					catch(ObjectDisposedException)
+					{
+					}
+				}
+			}
+			else
+			{
+				mi();
+			}
+
+			/**/
+			if(_frameCounter >= _skipFrames)
+			{
+				//устанавливаем кадр, который требуется проанализировать
+				_detector.UpdateImages(_matrix);
+
+				var rects = _detector.DetectFaces();
+
+				mi = new MethodInvoker(() => DrawRectangles(rects));
+				if(_frameImage.InvokeRequired)
+				{
+					if(!IsDisposed)
+					{
+						try
+						{
+							_frameImage.BeginInvoke(mi);
+						}
+						catch(ObjectDisposedException)
+						{
+						}
+					}
+				}
+				else
+				{
+					mi();
+				}
+
+				FaceProcessing();
+
+				_frameCounter = 0;
+			}
+			_frameCounter++;
+			/**/
+		}
+
+		private Rect Shakalization(Rect rect)
+		{
+			int frameWidth = _frameImage.Matrix.Width,
+				frameHeigth = _frameImage.Matrix.Height,
+				componentWidth = _frameImage.Width,
+				componentHeigth = _frameImage.Height;
+
+			double shakalizationFactor = (double)componentWidth / frameWidth;
+
+			int shiftY = (int)(componentHeigth - (frameHeigth * shakalizationFactor)) / 2;
+
+			rect.X = (int)(rect.X * shakalizationFactor);
+			rect.Y = (int)((rect.Y * shakalizationFactor) + shiftY);
+
+			rect.Width = (int)(rect.Width * shakalizationFactor);
+			rect.Height = (int)(rect.Height * shakalizationFactor);
+
+			return rect;
+		}
+
+		private void FaceProcessing()
+		{
+			foreach(var face in _detector.FacesRepository)
+			{
+				lock(this)
+				{
+					_recognizer.Recognize(face);
+
+					double avgBrightness = face.AverageBrightness();
+
+					Log.Info(avgBrightness);
+				}
+			}
+
+			_detector
+					.FacesRepository
+					.Clear();
+		}
+
+		private void OnExitToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			this.Close();
+		}
+
 		#endregion
 	}
 }

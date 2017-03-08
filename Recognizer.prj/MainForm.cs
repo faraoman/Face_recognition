@@ -346,13 +346,26 @@ namespace Recognizer
 			_videoSource.Stop();
 			_videoSource.Close();
 
+			if(_videoSource != null)
+			{
+				_videoSource.DetachAllMatrices();
+				_videoSource.MatrixUpdated -= OnMatrixUpdated;
+			}
+
+			_recognizer.FaceRecognized -= OnFaceRecognized;
+
 			using(var formLists = new UserLists(_container))
 			{
 				formLists.ShowDialog(this);
+				
 			}
-
 			_videoSource.Open();
 			_videoSource.Start();
+
+			_videoSource.AttachMatrix(_matrix);
+			_videoSource.MatrixUpdated += OnMatrixUpdated;
+			_recognizer.FaceRecognized += OnFaceRecognized;
+
 
 		}
 
