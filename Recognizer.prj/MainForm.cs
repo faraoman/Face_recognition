@@ -51,18 +51,10 @@ namespace Recognizer
 
 			_container = container;
 
-			// fixme
-			//var loggingService = _container.Resolve<ILoggingService>();
-			Log = LogManager.GetLog(typeof(LoggingService));
+			Log = _container.Resolve<ILog>();
 
 			InitializeRecognizer();
 			InitializeVideoSource();
-
-			_logView.Appender = new LogViewAppender();
-			_logView.Appender.DoAppend(new LogEvent(Level.Info, "Hello, bitch", new Exception(), DateTime.Now, "root"));
-
-			//_recognitionLogController = container.Resolve<RecognitionLogController>();
-			//_recognitionLogController.DataGridView = dataGridView1;
 		}
 
 		#endregion
@@ -99,16 +91,6 @@ namespace Recognizer
 			_frameImage.Matrix = _matrix;
 			_frameImage.ManualUpdateRendererCache = true;
 			_frameImage.SizeMode = ImageSizeMode.Zoom;
-
-			/*Вставка видео*/
-			//var c = new FFmpegVideoSource();
-			//c.RepeatAfterMediaEnded = true;
-			//c.StreamUrl = "testing_video.avi";
-			//c.AttachMatrix(_matrix);
-
-			//current
-			//var cur = new DXCaptureSource();
-			//_videoSource = cur;
 
 			_videoSource.AttachMatrix(_matrix);
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
@@ -165,7 +147,11 @@ namespace Recognizer
 			{
 				lock(this)
 				{
-					_recognizer.Recognize(face); 
+					_recognizer.Recognize(face);
+
+					double avgBrightness = face.AverageBrightness();
+
+					Log.Info(avgBrightness);
 				}
 			}
 
@@ -192,32 +178,6 @@ namespace Recognizer
 				var resultStr = "Распознан " + employeeRecord;
 
 				Log.Info(resultStr);
-
-				var mi = new MethodInvoker(() =>
-				{
-					if(!IsDisposed)
-					{
-						_listBox.Items.Add(resultStr);
-					}
-				});
-
-				if(_listBox.InvokeRequired)
-				{
-					if(!IsDisposed)
-					{
-						try
-						{
-							_listBox.BeginInvoke(mi);
-						}
-						catch(ObjectDisposedException)
-						{
-						}
-					}
-				}
-				else
-				{
-					mi();
-				}
 			}
 			catch(Exception exc)
 			{
@@ -299,8 +259,9 @@ namespace Recognizer
 			/**/
 		}
 
-		private void OnButtonTestOpenCV_Click(object sender, EventArgs e)
+		private void OnRecognizeByPhotoToolStripMenuItem_Click(object sender, EventArgs e)
 		{
+			_videoSource.Stop();
 			OpenFileDialog openFile = new OpenFileDialog();
 			openFile.Title = "Выберите картинку";
 			openFile.InitialDirectory = Path.Combine(
@@ -314,27 +275,6 @@ namespace Recognizer
 				var detector = new FaceDetector(openFile.FileName);
 
 				detector.DetectFaces();
-				detector.DrawFaceRectangles();
-				/**/
-
-				//string trainDataPath = Path.Combine(
-				//	Directory.GetCurrentDirectory(),
-				//	"Samples",
-				//	"LBPFaces.xml");
-
-
-				//_recognizer.Train(_images, _labels);
-				//_recognizer.Save(trainDataPath);
-
-				//!Примерно вот так можно скопировать из ресурсов строку во вновь созданный файл
-				/**/
-				var facesxml_string = Properties.Resources.LBPFaces;
-
-
-				File.WriteAllText(Path.Combine(
-					Directory.GetCurrentDirectory(),
-					"Samples",
-					"LBPFacesCOPY.xml"), facesxml_string);
 
 				var trainDataPath = Path.Combine(
 					Directory.GetCurrentDirectory(),
@@ -379,115 +319,29 @@ namespace Recognizer
 				detector
 					.FacesRepository
 					.Clear();
+
+				_videoSource.Start();
 			}
 		}
 
-		private void OnButtonTestCamera_Click(object sender, EventArgs e)
+		private void OnExitToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-
-			_videoSource.Stop();
-			_videoSource.Close();
-
-			IplImage frame = null;
-			//IplImage src = null;
-			CvCapture capture = null;
-
-			//CvWindow windowCapture = new CvWindow("Camera capture");
-
-			using(CvWindow windowCapture = new CvWindow("Camera capture", WindowMode.KeepRatio))
-			{
-				try
-				{
-					capture = new CvCapture(0);
-				}
-				catch
-				{
-					Debug.WriteLine("Error: can't open camera.");
-				}
-
-				if(capture != null)
-				{
-
-					double width = capture.GetCaptureProperty(CaptureProperty.FrameWidth);
-					double height = capture.GetCaptureProperty(CaptureProperty.FrameHeight);
-
-					Debug.WriteLine("Width: " + width);
-					Debug.WriteLine("Height: " + height);
-
-					int counter = 0;
-					while(true)
-					{
-						capture.GrabFrame();
-						frame = capture.RetrieveFrame();
-
-						windowCapture.ShowImage(frame);
-
-						int key = CvWindow.WaitKey(33);
-						if(key == 27) // ESC 
-						{
-							windowCapture.Close();
-							break;
-
-						}
-						else if(key == 13) //Enter 
-						{
-							frame.SaveImage($"Image{ counter}.jpg");
-							counter++;
-						}
-					}
-				}
-				else
-				{
-					Debug.WriteLine("Error: can't open camera.");
-				}
-				Debug.WriteLine("End");
-			}
-
-			_videoSource.Open();
-			_videoSource.Start();
+			this.Close();
 		}
 
-		private void _btnTestBtn_Click(object sender, EventArgs e)
-		{
-			// stop videosource
-			_videoSource.Stop();
-			_videoSource.Close();
-			using(TestForm testForm = new TestForm(_container))
-			{
-				if(testForm.ShowDialog() != DialogResult.Cancel)
-				{
-
-				}
-			}
-			// start videosource
-			_videoSource.Open();
-			_videoSource.Start();
-		}
-
-		private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-		{
-
-		}
-
-		private void настройкиToolStripMenuItem_Click(object sender, EventArgs e)
+		private void OnCameraSettingsToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			using(var setupForm = new SingleControlSetupForm(_videoSourceProvider.CreateSetupControl(_videoSource)))
 			{
 				if(setupForm.ShowDialog(this) == DialogResult.OK)
 				{
-					_videoSource.Close();
-					_videoSource.Open();
+					_videoSource.Stop();
 					_videoSource.Start();
 				}
 			}
 		}
 
-		private void выходToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			this.Close();
-		}
-
-		private void спискиToolStripMenuItem_Click(object sender, EventArgs e)
+		private void OnListsToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			_videoSource.Stop();
 			_videoSource.Close();
@@ -502,10 +356,6 @@ namespace Recognizer
 
 		}
 
-		private void _btnTestVideoFromFile_Click(object sender, EventArgs e)
-		{
-			var m = new ColorMatrix().ToMat();
-		} 
 		#endregion
 	}
 }

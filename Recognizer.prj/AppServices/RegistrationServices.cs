@@ -34,11 +34,6 @@ namespace Recognizer
 				.AsSelf();
 
 			containerBuilder
-				.RegisterType<LoggingService>()
-				.SingleInstance()
-				.As<ILoggingService>();
-
-			containerBuilder
 				.RegisterType<FaceDetector>()
 				.SingleInstance()
 				.AsSelf();

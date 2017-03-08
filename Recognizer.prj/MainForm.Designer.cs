@@ -28,11 +28,8 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this._btnTestOpenCV = new System.Windows.Forms.Button();
-			this._btnTestCamera = new System.Windows.Forms.Button();
 			this._logView = new Mallenom.Diagnostics.Logs.LogView();
 			this._frameImage = new Mallenom.Imaging.FrameImage();
-			this._btnTestBtn = new System.Windows.Forms.Button();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.сервисToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.настройкиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,41 +37,19 @@
 			this.выходToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.базаДанныхToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.спискиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this._RecognizeByPhotoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this._lblExecutingProtocol = new System.Windows.Forms.Label();
-			this._listBox = new System.Windows.Forms.ListBox();
 			this.menuStrip1.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// _btnTestOpenCV
-			// 
-			this._btnTestOpenCV.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this._btnTestOpenCV.Location = new System.Drawing.Point(680, 428);
-			this._btnTestOpenCV.Name = "_btnTestOpenCV";
-			this._btnTestOpenCV.Size = new System.Drawing.Size(132, 23);
-			this._btnTestOpenCV.TabIndex = 0;
-			this._btnTestOpenCV.Text = "Test OpenCV";
-			this._btnTestOpenCV.UseVisualStyleBackColor = true;
-			this._btnTestOpenCV.Click += new System.EventHandler(this.OnButtonTestOpenCV_Click);
-			// 
-			// _btnTestCamera
-			// 
-			this._btnTestCamera.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this._btnTestCamera.Location = new System.Drawing.Point(680, 457);
-			this._btnTestCamera.Name = "_btnTestCamera";
-			this._btnTestCamera.Size = new System.Drawing.Size(132, 23);
-			this._btnTestCamera.TabIndex = 1;
-			this._btnTestCamera.Text = "Test Camera";
-			this._btnTestCamera.UseVisualStyleBackColor = true;
-			this._btnTestCamera.Click += new System.EventHandler(this.OnButtonTestCamera_Click);
 			// 
 			// _logView
 			// 
 			this._logView.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
 			| System.Windows.Forms.AnchorStyles.Right)));
 			this._logView.AppenderName = "root";
-			this._logView.Location = new System.Drawing.Point(2, 549);
+			this._logView.Location = new System.Drawing.Point(2, 542);
 			this._logView.Name = "_logView";
-			this._logView.Size = new System.Drawing.Size(810, 155);
+			this._logView.Size = new System.Drawing.Size(802, 165);
 			this._logView.TabIndex = 3;
 			// 
 			// _frameImage
@@ -87,31 +62,20 @@
 			this._frameImage.FPSFont = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
 			this._frameImage.Location = new System.Drawing.Point(0, 27);
 			this._frameImage.Name = "_frameImage";
-			this._frameImage.Size = new System.Drawing.Size(500, 500);
+			this._frameImage.Size = new System.Drawing.Size(804, 496);
 			this._frameImage.TabIndex = 4;
-			// 
-			// _btnTestBtn
-			// 
-			this._btnTestBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this._btnTestBtn.Location = new System.Drawing.Point(680, 487);
-			this._btnTestBtn.Name = "_btnTestBtn";
-			this._btnTestBtn.Size = new System.Drawing.Size(132, 23);
-			this._btnTestBtn.TabIndex = 5;
-			this._btnTestBtn.Text = "TestForm";
-			this._btnTestBtn.UseVisualStyleBackColor = true;
-			this._btnTestBtn.Click += new System.EventHandler(this._btnTestBtn_Click);
 			// 
 			// menuStrip1
 			// 
 			this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
 			this.сервисToolStripMenuItem,
-			this.базаДанныхToolStripMenuItem});
+			this.базаДанныхToolStripMenuItem,
+			this._RecognizeByPhotoToolStripMenuItem});
 			this.menuStrip1.Location = new System.Drawing.Point(0, 0);
 			this.menuStrip1.Name = "menuStrip1";
-			this.menuStrip1.Size = new System.Drawing.Size(817, 24);
+			this.menuStrip1.Size = new System.Drawing.Size(804, 24);
 			this.menuStrip1.TabIndex = 6;
 			this.menuStrip1.Text = "menuStrip1";
-			this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
 			// 
 			// сервисToolStripMenuItem
 			// 
@@ -130,7 +94,7 @@
 			this.настройкиToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F8;
 			this.настройкиToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
 			this.настройкиToolStripMenuItem.Text = "Настройка...";
-			this.настройкиToolStripMenuItem.Click += new System.EventHandler(this.настройкиToolStripMenuItem_Click);
+			this.настройкиToolStripMenuItem.Click += new System.EventHandler(this.OnCameraSettingsToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem1
 			// 
@@ -144,7 +108,7 @@
 			this.выходToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
 			this.выходToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
 			this.выходToolStripMenuItem.Text = "Выход";
-			this.выходToolStripMenuItem.Click += new System.EventHandler(this.выходToolStripMenuItem_Click);
+			this.выходToolStripMenuItem.Click += new System.EventHandler(this.OnExitToolStripMenuItem_Click);
 			// 
 			// базаДанныхToolStripMenuItem
 			// 
@@ -159,41 +123,35 @@
 			this.спискиToolStripMenuItem.Name = "спискиToolStripMenuItem";
 			this.спискиToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
 			this.спискиToolStripMenuItem.Text = "Списки";
-			this.спискиToolStripMenuItem.Click += new System.EventHandler(this.спискиToolStripMenuItem_Click);
+			this.спискиToolStripMenuItem.Click += new System.EventHandler(this.OnListsToolStripMenuItem_Click);
+			// 
+			// _RecognizeByPhotoToolStripMenuItem
+			// 
+			this._RecognizeByPhotoToolStripMenuItem.Name = "_RecognizeByPhotoToolStripMenuItem";
+			this._RecognizeByPhotoToolStripMenuItem.Size = new System.Drawing.Size(129, 20);
+			this._RecognizeByPhotoToolStripMenuItem.Text = "Распознать по фото";
+			this._RecognizeByPhotoToolStripMenuItem.Click += new System.EventHandler(this.OnRecognizeByPhotoToolStripMenuItem_Click);
 			// 
 			// _lblExecutingProtocol
 			// 
 			this._lblExecutingProtocol.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
 			| System.Windows.Forms.AnchorStyles.Right)));
 			this._lblExecutingProtocol.AutoSize = true;
-			this._lblExecutingProtocol.Location = new System.Drawing.Point(3, 532);
+			this._lblExecutingProtocol.Location = new System.Drawing.Point(3, 526);
 			this._lblExecutingProtocol.Name = "_lblExecutingProtocol";
 			this._lblExecutingProtocol.Size = new System.Drawing.Size(161, 13);
 			this._lblExecutingProtocol.TabIndex = 7;
 			this._lblExecutingProtocol.Text = "Протокол работы программы:";
-			// 
-			// _listBox
-			// 
-			this._listBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this._listBox.FormattingEnabled = true;
-			this._listBox.Location = new System.Drawing.Point(507, 28);
-			this._listBox.Name = "_listBox";
-			this._listBox.Size = new System.Drawing.Size(305, 394);
-			this._listBox.TabIndex = 8;
 			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Control;
-			this.ClientSize = new System.Drawing.Size(817, 707);
-			this.Controls.Add(this._listBox);
+			this.ClientSize = new System.Drawing.Size(804, 711);
 			this.Controls.Add(this._lblExecutingProtocol);
-			this.Controls.Add(this._btnTestBtn);
 			this.Controls.Add(this._frameImage);
 			this.Controls.Add(this._logView);
-			this.Controls.Add(this._btnTestCamera);
-			this.Controls.Add(this._btnTestOpenCV);
 			this.Controls.Add(this.menuStrip1);
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "MainForm";
@@ -207,12 +165,8 @@
 		}
 
 		#endregion
-
-		private System.Windows.Forms.Button _btnTestOpenCV;
-		private System.Windows.Forms.Button _btnTestCamera;
 		private Mallenom.Diagnostics.Logs.LogView _logView;
 		private Mallenom.Imaging.FrameImage _frameImage;
-		private System.Windows.Forms.Button _btnTestBtn;
 		private System.Windows.Forms.MenuStrip menuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem сервисToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem настройкиToolStripMenuItem;
@@ -221,6 +175,6 @@
 		private System.Windows.Forms.ToolStripMenuItem спискиToolStripMenuItem;
 		private System.Windows.Forms.Label _lblExecutingProtocol;
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-		private System.Windows.Forms.ListBox _listBox;
+		private System.Windows.Forms.ToolStripMenuItem _RecognizeByPhotoToolStripMenuItem;
 	}
 }
