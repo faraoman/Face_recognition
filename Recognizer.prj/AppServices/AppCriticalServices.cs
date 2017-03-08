@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Mallenom;
 using Mallenom.AppServices;
+using Mallenom.Diagnostics.Logs;
 using Recognizer.Logs;
 
 namespace Recognizer
@@ -11,7 +12,12 @@ namespace Recognizer
 		private readonly IApplicationProfileDirectory _logsDirectory;
 		private readonly IApplicationProfileDirectory _dbDirectory;
 
-		private readonly LoggingService _logService;
+		private readonly ILoggingService _loggingService;
+
+		IAppender[] appenders = new Appender[]
+		{
+			new LogViewAppender(102400, "logView")
+		};
 
 		public AppCriticalServices()
 		{
@@ -19,7 +25,7 @@ namespace Recognizer
 			_logsDirectory = DefaultLogger.LogDirectory;
 			_dbDirectory = Services.DatabaseDirectory;
 
-			_logService = new LoggingService(_logsDirectory);
+			_loggingService = new LoggingService(_logsDirectory, "logs.log", appenders);
 		}
 
 		public void Register(ContainerBuilder builder)
@@ -32,7 +38,7 @@ namespace Recognizer
 				.SingleInstance();
 
 			builder
-				.RegisterInstance(_logService)
+				.RegisterInstance(_loggingService)
 				.AsSelf();
 
 			builder
@@ -44,12 +50,6 @@ namespace Recognizer
 				.RegisterInstance(_dbDirectory)
 				.Named<IApplicationProfileDirectory>("database")
 				.ExternallyOwned();
-
-			var logger = new Logger(_logsDirectory);
-
-			builder
-				.RegisterInstance(logger)
-				.As<ILog>();
 		}
 	}
 }

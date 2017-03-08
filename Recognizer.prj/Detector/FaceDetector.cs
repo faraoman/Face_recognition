@@ -169,7 +169,7 @@ namespace Recognizer.Detector
 
 			return DetectedFaces;
 		}
-	
+
 		/// <summary>
 		/// Рисует найденные прямоугольники <seealso cref="Rect"/>. 
 		/// </summary>

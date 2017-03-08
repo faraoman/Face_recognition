@@ -65,9 +65,6 @@ namespace Recognizer.Entities
 
 		#endregion
 
-		public override string ToString()
-		{
-			return $"Id: {Id}, Фамилия: {LastName}, Имя: {FirstName}, Отчество: {Patronymic}, Метка: {PersonLabel}.";
-		}
+		public override string ToString() => $"Id: {Id}, Фамилия: {LastName}, Имя: {FirstName}, Отчество: {Patronymic}, Метка: {PersonLabel}.";
 	}
 }

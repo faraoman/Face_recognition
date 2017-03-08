@@ -1,57 +1,67 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Autofac;
+using OpenCvSharp;
+using OpenCvSharp.CPlusPlus;
 using Recognizer.Database;
+using Recognizer.Detector;
 using Recognizer.Entities;
+using Recognizer.Recognition;
 using static Recognizer.Logs.LoggingService;
 
 namespace Recognizer
 {
 	public partial class TestForm : Form
 	{
-		public TestForm()
+		IComponentContext _container;
+
+		public TestForm(IComponentContext container)
 		{
 			InitializeComponent();
+
+			_container = container;
+
 		}
 
 		private void _btnLoadImage_Click(object sender, EventArgs e)
 		{
-			var dbService = Services.DatabaseService;
+			var recogizer = _container.Resolve<LBPFaceRecognizer>();
 
-			//Employee employee = new Employee
-			//{
-			//	FirstName = "Pavel",
-			//	Patronymic = "Ivanovich",
-			//	LastName = "Shevelev",
-			//	PersonLabel = 1
-			//};
+			OpenFileDialog openFile = new OpenFileDialog();
+			openFile.Title = "Выберите картинку";
+			openFile.InitialDirectory = Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Photo");
+			openFile.Filter = "Images|*.jpg;*.png;*.bmp|All files|*.*";
 
-			Employee employee = new Employee
+			
+
+			if(openFile.ShowDialog() == DialogResult.OK)
 			{
-				FirstName = "Andrey",
-				Patronymic = "Alekseevich",
-				LastName = "Okomin",
-				PersonLabel = 3
-			};
+				var faceDetector = new FaceDetector(openFile.FileName);
+				Mat cop = faceDetector.OutputMatrix.ConvertToGray();
+				//Mat mat = new Mat(openFile.FileName, LoadMode.AnyColor);
+				int label = 7;
 
-			//try
-			//{
-			//	var context = new RecognizerContext();
+				var mats = new List<Mat>();
+				var labels = new List<int>();
 
-			//	var employees = context
-			//		.Set<Employee>()
-			//		.ToList();
+				mats.Add(cop);
+				labels.Add(label);
 
-			//	context
-			//		.Set<Employee>()
-			//		.RemoveRange(employees);
+				recogizer.Update(mats, labels);
 
-			//	context.SaveChanges();
-			//}
-			//catch(Exception exc)
-			//{
-			//	Log.Error("Database initialization error", exc);
-			//}
+				var trainDataPath = Path.Combine(
+						Directory.GetCurrentDirectory(),
+						"Samples",
+						"LBPFaces.xml");
+
+				recogizer.Save(trainDataPath);
+			}
+						
 		}
 	}
 }

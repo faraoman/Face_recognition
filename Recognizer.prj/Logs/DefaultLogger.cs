@@ -11,16 +11,8 @@ namespace Recognizer.Logs
 				.ApplicationProfileService
 				.LocalMachine
 				.RegisterDirectory(@"Logs", ApplicationProfileDirectoryUsage.Logs);
-
-			Log = new Logger(LogDirectory, "logs.log");
 		}
 
 		public static IApplicationProfileDirectory LogDirectory { get; }
-		public static ILog Log { get; }
-
-		//public static ILog GetLog()
-		//{
-		//	return Log;
-		//}
 	}
 }
