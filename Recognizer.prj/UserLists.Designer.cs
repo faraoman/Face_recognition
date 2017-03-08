@@ -1,4 +1,6 @@
-﻿namespace Recognizer
+﻿using System.Windows.Forms;
+
+namespace Recognizer
 {
 	partial class UserLists
 	{
@@ -28,28 +30,15 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.listBox1 = new System.Windows.Forms.ListBox();
 			this._btnShowEmployees = new System.Windows.Forms.Button();
 			this._btnAddEmployee = new System.Windows.Forms.Button();
+			this._dataGridView = new System.Windows.Forms.DataGridView();
+			((System.ComponentModel.ISupportInitialize)(this._dataGridView)).BeginInit();
 			this.SuspendLayout();
-			// 
-			// listBox1
-			// 
-			this.listBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-			this.listBox1.Cursor = System.Windows.Forms.Cursors.Arrow;
-			this.listBox1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.listBox1.FormattingEnabled = true;
-			this.listBox1.IntegralHeight = false;
-			this.listBox1.ItemHeight = 100;
-			this.listBox1.Location = new System.Drawing.Point(5, 5);
-			this.listBox1.Name = "listBox1";
-			this.listBox1.Size = new System.Drawing.Size(360, 459);
-			this.listBox1.TabIndex = 0;
 			// 
 			// _btnShowEmployees
 			// 
-			this._btnShowEmployees.Location = new System.Drawing.Point(383, 5);
+			this._btnShowEmployees.Location = new System.Drawing.Point(383, 12);
 			this._btnShowEmployees.Name = "_btnShowEmployees";
 			this._btnShowEmployees.Size = new System.Drawing.Size(179, 23);
 			this._btnShowEmployees.TabIndex = 1;
@@ -59,7 +48,7 @@
 			// 
 			// _btnAddEmployee
 			// 
-			this._btnAddEmployee.Location = new System.Drawing.Point(383, 35);
+			this._btnAddEmployee.Location = new System.Drawing.Point(383, 42);
 			this._btnAddEmployee.Name = "_btnAddEmployee";
 			this._btnAddEmployee.Size = new System.Drawing.Size(179, 23);
 			this._btnAddEmployee.TabIndex = 2;
@@ -67,28 +56,41 @@
 			this._btnAddEmployee.UseVisualStyleBackColor = true;
 			this._btnAddEmployee.Click += new System.EventHandler(this._btnAddEmployee_Click);
 			// 
+			// _dataGridView
+			// 
+			this._dataGridView.AllowUserToAddRows = false;
+			this._dataGridView.AllowUserToDeleteRows = false;
+			this._dataGridView.AllowUserToResizeRows = false;
+			this._dataGridView.Location = new System.Drawing.Point(12, 12);
+			this._dataGridView.Name = "_dataGridView";
+			this._dataGridView.ReadOnly = true;
+			this._dataGridView.RowHeadersVisible = false;
+			this._dataGridView.Size = new System.Drawing.Size(365, 487);
+			//this._dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+			this._dataGridView.TabIndex = 9;
+			// 
 			// UserLists
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
 			this.ClientSize = new System.Drawing.Size(574, 511);
+			this.Controls.Add(this._dataGridView);
 			this.Controls.Add(this._btnAddEmployee);
 			this.Controls.Add(this._btnShowEmployees);
-			this.Controls.Add(this.listBox1);
 			this.Name = "UserLists";
 			this.ShowIcon = false;
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Списки";
+			((System.ComponentModel.ISupportInitialize)(this._dataGridView)).EndInit();
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
-
-		private System.Windows.Forms.ListBox listBox1;
 		private System.Windows.Forms.Button _btnShowEmployees;
 		private System.Windows.Forms.Button _btnAddEmployee;
+		private System.Windows.Forms.DataGridView _dataGridView;
 	}
 }

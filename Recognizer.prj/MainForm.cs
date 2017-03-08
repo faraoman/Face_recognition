@@ -6,9 +6,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
 
+using Mallenom;
+using Mallenom.Diagnostics.Logs;
 using Mallenom.Imaging;
 using Mallenom.Setup;
 using Mallenom.Video;
+using Mallenom.Video.DirectShow;
 using Mallenom.Video.FFmpeg;
 
 using OpenCvSharp;
@@ -19,15 +22,12 @@ using Recognizer.Detector;
 using Recognizer.Recognition;
 using Recognizer.Logs;
 
-using Mallenom;
-using Mallenom.DShow;
-using Mallenom.Video.DirectShow;
-
-//Написать фейковый класс, который вернул бы какие-то записи из БД (Для Сони).
 namespace Recognizer
 {
 	public partial class MainForm : Form
 	{
+		#region Data
+
 		private IComponentContext _container;
 
 		private IVideoSourceProvider _videoSourceProvider;
@@ -37,7 +37,14 @@ namespace Recognizer
 		private FaceDetector _detector;
 		private LBPFaceRecognizer _recognizer;
 
-		private RecognitionLogController _recognitionLogController;
+		//private RecognitionLogController _recognitionLogController;
+
+		private int _frameCounter;
+		private int _skipFrames = 5;
+
+		#endregion
+
+		#region .ctor
 
 		public MainForm(IComponentContext container)
 		{
@@ -47,56 +54,33 @@ namespace Recognizer
 			this.FormClosing += OnMainFormClosing;
 
 			_container = container;
-			Log = _container.Resolve<ILog>();
+
+			// fixme
+			//var loggingService = _container.Resolve<ILoggingService>();
+			Log = LogManager.GetLog(typeof(LoggingService));
 
 			InitializeRecognizer();
 			InitializeVideoSource();
 
-			_recognitionLogController = container.Resolve<RecognitionLogController>();
-			_recognitionLogController.DataGridView = dataGridView1;
+			_logView.Appender = new LogViewAppender();
+			_logView.Appender.DoAppend(new LogEvent(Level.Info, "Hello, bitch", new Exception(), DateTime.Now, "root"));
 
-			//oldest version by artemd
-			/**
-			_videoSourceProvider = videoSourceProvider;
-			_videoSource = videoSource;
-			_matrix = new ColorMatrix();
-
-			_frameImage.Matrix = _matrix;
-			_frameImage.ManualUpdateRendererCache = true;
-			_frameImage.SizeMode = ImageSizeMode.Zoom;
-
-			_videoSource.AttachMatrix(_matrix);
-			_videoSource.MatrixUpdated += OnMatrixUpdated;
-			_videoSource.Open();
-			/**/
-
-			//тестирование видео без зума, Frames рисуются нормально
-			/**
-			_videoSourceProvider = videoSourceProvider;
-			_frameImage.SizeMode = ImageSizeMode.Zoom;
-			var source = new FFmpegVideoSource();
-			_matrix = new ColorMatrix();
-			source.StreamUrl = "testing_video.avi";
-			_frameImage.ManualUpdateRendererCache = true;
-			source.RepeatAfterMediaEnded = true;
-			_videoSource = source;
-			_videoSource.MatrixUpdated += OnMatrixUpdated;
-			_frameImage.Matrix = _matrix;
-			_detector = new FaceDetector(_frameImage);
-			_videoSource.AttachMatrix(_matrix);
-			_videoSource.Open();
-			_videoSource.Start();
-			/**/
+			//_recognitionLogController = container.Resolve<RecognitionLogController>();
+			//_recognitionLogController.DataGridView = dataGridView1;
 		}
-
-		#region Properties
-		ILog Log { get; } 
 
 		#endregion
 
+		#region Properties
+
+		ILog Log { get; }
+
+		#endregion
+
+		#region Methods
 		private void InitializeRecognizer()
 		{
-			_detector   = _container.Resolve<FaceDetector>();
+			_detector = _container.Resolve<FaceDetector>();
 			_recognizer = _container.Resolve<LBPFaceRecognizer>();
 
 			var trainDataPath = Path.Combine(
@@ -105,18 +89,20 @@ namespace Recognizer
 						"LBPFaces.xml");
 
 			_recognizer.Load(trainDataPath);
+
+			_recognizer.FaceRecognized += OnFaceRecognized;
 		}
 
 		private void InitializeVideoSource()
 		{
 			_videoSourceProvider = _container.Resolve<IVideoSourceProvider>();
-			_videoSource         = _videoSourceProvider.CreateVideoSource();
+			_videoSource = _videoSourceProvider.CreateVideoSource();
 
-			_matrix              = new ColorMatrix();
+			_matrix = new ColorMatrix();
 
-			_frameImage.Matrix                    = _matrix;
+			_frameImage.Matrix = _matrix;
 			_frameImage.ManualUpdateRendererCache = true;
-			_frameImage.SizeMode                  = ImageSizeMode.Zoom;
+			_frameImage.SizeMode = ImageSizeMode.Zoom;
 
 			/*Вставка видео*/
 			//var c = new FFmpegVideoSource();
@@ -125,8 +111,8 @@ namespace Recognizer
 			//c.AttachMatrix(_matrix);
 
 			//current
-			var cur = new DXCaptureSource();
-			_videoSource = cur;
+			//var cur = new DXCaptureSource();
+			//_videoSource = cur;
 
 			_videoSource.AttachMatrix(_matrix);
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
@@ -141,6 +127,108 @@ namespace Recognizer
 			}
 		}
 
+		private void DrawRectangles(Rect[] rectangles)
+		{
+			_frameImage.Frames.Clear();
+			foreach(var rect in rectangles)
+			{
+				Rect rect_ = Shakalization(rect);
+
+				_frameImage.Frames.Add(new Frame(rect_.X, rect_.Y, rect_.Width, rect_.Height)
+				{
+					Locked = true,
+					Visible = true
+				});
+			}
+			_frameImage.InvalidateCache();
+		}
+
+		private Rect Shakalization(Rect rect)
+		{
+			int frameWidth = _frameImage.Matrix.Width,
+				frameHeigth = _frameImage.Matrix.Height,
+				componentWidth = _frameImage.Width,
+				componentHeigth = _frameImage.Height;
+
+			double shakalizationFactor = (double)componentWidth / frameWidth;
+
+			int shiftY = (int)(componentHeigth - (frameHeigth * shakalizationFactor)) / 2;
+
+			rect.X = (int)(rect.X * shakalizationFactor);
+			rect.Y = (int)((rect.Y * shakalizationFactor) + shiftY);
+
+			rect.Width = (int)(rect.Width * shakalizationFactor);
+			rect.Height = (int)(rect.Height * shakalizationFactor);
+
+			return rect;
+		}
+
+		private void FaceProcessing()
+		{
+			foreach(var face in _detector.FacesRepository)
+			{
+				lock(this)
+				{
+					_recognizer.Recognize(face); 
+				}
+			}
+
+			_detector
+					.FacesRepository
+					.Clear();
+		}
+		#endregion
+
+		#region EventHandlers
+		
+		/// <summary> Обработчик события <see cref="LBPFaceRecognizer.FaceRecognized"/>. </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void OnFaceRecognized(object sender, FaceRecognizedEventArgs e)
+		{
+			try
+			{
+				var employeeLogRepository = _container.Resolve<EmployeesLogRepository>();
+				var filter = _container.Resolve<EmployeesLogRepositoryFilter>();
+				filter.PersonLabel = e.Label;
+
+				var employeeRecord = employeeLogRepository.FetchRecords(filter)[0];
+				var resultStr = "Распознан " + employeeRecord;
+
+				Log.Info(resultStr);
+
+				var mi = new MethodInvoker(() =>
+				{
+					if(!IsDisposed)
+					{
+						_listBox.Items.Add(resultStr);
+					}
+				});
+
+				if(_listBox.InvokeRequired)
+				{
+					if(!IsDisposed)
+					{
+						try
+						{
+							_listBox.BeginInvoke(mi);
+						}
+						catch(ObjectDisposedException)
+						{
+						}
+					}
+				}
+				else
+				{
+					mi();
+				}
+			}
+			catch(Exception exc)
+			{
+				Log.Error("Ошибка в запросе к БД", exc);
+			}
+		}
+
 		private void OnMainFormClosing(object sender, FormClosingEventArgs e)
 		{
 			if(_videoSource != null)
@@ -148,14 +236,13 @@ namespace Recognizer
 				_videoSource.DetachAllMatrices();
 				_videoSource.MatrixUpdated -= OnMatrixUpdated;
 			}
-		}
 
-		private int _frameCounter;
-		private int _skipFrames = 5;
+			_recognizer.FaceRecognized -= OnFaceRecognized;
+		}
 
 		private void OnMatrixUpdated(object sender, MatrixUpdatedEventArgs e)
 		{
-			var mi = new MethodInvoker(()=>
+			var mi = new MethodInvoker(() =>
 			{
 				if(!IsDisposed)
 				{
@@ -185,11 +272,6 @@ namespace Recognizer
 			if(_frameCounter >= _skipFrames)
 			{
 				//устанавливаем кадр, который требуется проанализировать
-				//_detector.UpdateImages(_matrix.CreateBitmap());
-
-				//пытаемся распознать человека FaceRecognizer'ом
-				//_detector.DetectFaces();
-				//_detector.DrawFaceRectangles();
 				_detector.UpdateImages(_matrix);
 
 				var rects = _detector.DetectFaces();
@@ -213,16 +295,15 @@ namespace Recognizer
 					mi();
 				}
 
-				/*await*/
-				FaceProcessing(/*_detector.FacesRepository*/);
-				
+				FaceProcessing();
+
 				_frameCounter = 0;
 			}
 			_frameCounter++;
 			/**/
 		}
 
-		private /*async*/ void OnButtonTestOpenCV_Click(object sender, EventArgs e)
+		private void OnButtonTestOpenCV_Click(object sender, EventArgs e)
 		{
 			OpenFileDialog openFile = new OpenFileDialog();
 			openFile.Title = "Выберите картинку";
@@ -305,95 +386,16 @@ namespace Recognizer
 			}
 		}
 
-		private void DrawRectangles(Rect[] rectangles)
-		{
-			_frameImage.Frames.Clear();
-			foreach(var rect in rectangles)
-			{
-				Rect rect_ = Shakalization(rect);
-
-				_frameImage.Frames.Add(new Frame(rect_.X, rect_.Y, rect_.Width, rect_.Height)
-				{
-					Locked = true,
-					Visible = true
-				});
-			}
-			_frameImage.InvalidateCache();
-		}
-
-		private Rect Shakalization(Rect rect)
-		{
-			int frameWidth		= _frameImage.Matrix.Width,
-				frameHeigth		= _frameImage.Matrix.Height,
-				componentWidth	= _frameImage.Width,
-				componentHeigth = _frameImage.Height;
-
-
-
-			double shakalizationFactor = (double) componentWidth / frameWidth;
-
-
-			int shiftY = (int) (componentHeigth - (frameHeigth*shakalizationFactor)) / 2;
-
-			rect.X = (int) (rect.X * shakalizationFactor);
-			rect.Y = (int) ((rect.Y * shakalizationFactor)+shiftY);
-
-
-			rect.Width = (int) (rect.Width * shakalizationFactor);
-			rect.Height = (int)(rect.Height * shakalizationFactor);
-
-
-			return rect;
-		}
-
-		private void FaceProcessing()
-		{	
-			foreach(var face in _detector.FacesRepository)
-			{
-				int result = _recognizer.Recognize(face);
-				string resultStr = string.Empty;
-
-				if(result != -1)
-				{
-					try
-					{
-						var employeeLogRepository = _container.Resolve<EmployeesLogRepository>();
-						var filter = _container.Resolve<EmployeesLogRepositoryFilter>();
-						filter.PersonLabel = result;
-
-						var employeeRecord = employeeLogRepository.FetchRecords(filter)[0];
-
-						resultStr = "Распознан " + employeeRecord;
-
-						Log.Info(resultStr);
-					}
-					catch(Exception exc)
-					{
-						Log.Error("Ошибка в запросе к БД", exc);
-					}
-				}
-
-				else
-				{
-					resultStr = "Лицо не распознано";
-
-					Log.Info(resultStr);
-				}
-
-				//MessageBox.Show(resultStr, "Recognizer", MessageBoxButtons.OK);
-			}
-
-			_detector
-					.FacesRepository
-					.Clear();
-		}
-
 		private void OnButtonTestCamera_Click(object sender, EventArgs e)
 		{
+
+			_videoSource.Stop();
+			_videoSource.Close();
+
 			IplImage frame = null;
 			//IplImage src = null;
 			CvCapture capture = null;
-			
+
 			//CvWindow windowCapture = new CvWindow("Camera capture");
 
 			using(CvWindow windowCapture = new CvWindow("Camera capture", WindowMode.KeepRatio))
@@ -443,18 +445,27 @@ namespace Recognizer
 					Debug.WriteLine("Error: can't open camera.");
 				}
 				Debug.WriteLine("End");
-			}				
+			}
+
+			_videoSource.Open();
+			_videoSource.Start();
 		}
 
 		private void _btnTestBtn_Click(object sender, EventArgs e)
 		{
-			using(TestForm testForm = new TestForm())
+			// stop videosource
+			_videoSource.Stop();
+			_videoSource.Close();
+			using(TestForm testForm = new TestForm(_container))
 			{
 				if(testForm.ShowDialog() != DialogResult.Cancel)
 				{
 
 				}
 			}
+			// start videosource
+			_videoSource.Open();
+			_videoSource.Start();
 		}
 
 		private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -485,12 +496,13 @@ namespace Recognizer
 			using(var formLists = new UserLists(_container))
 			{
 				formLists.ShowDialog(this);
-			}					
+			}
 		}
 
 		private void _btnTestVideoFromFile_Click(object sender, EventArgs e)
 		{
 			var m = new ColorMatrix().ToMat();
-		}
+		} 
+		#endregion
 	}
 }

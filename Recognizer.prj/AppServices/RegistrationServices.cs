@@ -1,15 +1,15 @@
 ﻿using Autofac;
 using Mallenom;
-using Recognizer.Database;
-
-using Mallenom.Video;
-using Recognizer.Configuration;
-using Mallenom.AppServices;
-using Recognizer.Logs;
-using Recognizer.AppServices;
-using Recognizer.Detector;
-using Recognizer.Recognition;
+using Mallenom.Diagnostics.Logs;
 using Mallenom.Imaging;
+using Mallenom.Video;
+using Mallenom.Video.DirectShow;
+
+using Recognizer.AppServices;
+using Recognizer.Database;
+using Recognizer.Detector;
+using Recognizer.Logs;
+using Recognizer.Recognition;
 
 namespace Recognizer
 {
@@ -36,7 +36,7 @@ namespace Recognizer
 			containerBuilder
 				.RegisterType<LoggingService>()
 				.SingleInstance()
-				.AsSelf();
+				.As<ILoggingService>();
 
 			containerBuilder
 				.RegisterType<FaceDetector>()
@@ -53,25 +53,13 @@ namespace Recognizer
 				.SingleInstance()
 				.As<VideoImage>();
 
-			//var videoSourceProvider = new IPCameraSourceProvider();
-			//var configuration = videoSourceProvider.TryGetConfiguration();
-			//var videoSource = videoSourceProvider.CreateVideoSource();
-
-			//для видеозаписей из файла на диске
+			// webcam source
 			/**/
 			containerBuilder
-				.RegisterType<Mallenom.Video.FFmpeg.FFmpegVideoSourceProvider>()
+				.RegisterType<DXCaptureSourceProvider>()
 				.As<IVideoSourceProvider>()
 				.SingleInstance();
 			/**/
-
-			//containerBuilder
-			//	.RegisterInstance(new VideoSourceConfiguration(videoSource, configuration))
-			//	.As<ISerializableConfiguration>();
-
-			//containerBuilder
-			//	.RegisterInstance(videoSource)
-			//	.As<IVideoSource>();
 
 			containerBuilder
 				.RegisterType<RecognitionLogController>()

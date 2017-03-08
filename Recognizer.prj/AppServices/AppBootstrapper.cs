@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using Autofac;
-using Mallenom.Video;
 using Recognizer.AppServices;
-using static Recognizer.Logs.LoggingService;
 
 namespace Recognizer
 {

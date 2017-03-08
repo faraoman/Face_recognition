@@ -39,8 +39,20 @@ namespace Recognizer
 					_dataGridView = value;
 					{
 						_dataGridView.DataSource = Repository.FetchRecords();
+
+						SetHeaderText();
 					}
 				}
+			}
+		}
+
+		private void SetHeaderText()
+		{
+			for(int i = 0; i < _dataGridView.Columns.Count; i++)
+			{
+				_dataGridView
+					.Columns[i]
+					.HeaderText = EmployeesLogRecord.СolumnNames[i];
 			}
 		}
 	}

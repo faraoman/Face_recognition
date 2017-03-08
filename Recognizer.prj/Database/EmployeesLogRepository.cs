@@ -59,7 +59,10 @@ namespace Recognizer.Database.Data
 				{
 					records.Add(new EmployeesLogRecord
 					{
-						Record = $"{employee.LastName} {employee.FirstName} {employee.Patronymic}"
+						Id = employee.Id,
+						LastName = employee.LastName,
+						FirstName = employee.FirstName,
+						Patronymic = employee.Patronymic
 					});
 				}
 			}
@@ -86,7 +89,10 @@ namespace Recognizer.Database.Data
 					records.Add(
 						new EmployeesLogRecord
 						{
-							Record = $"{employee.LastName} {employee.FirstName} {employee.Patronymic}"
+							Id = employee.Id,
+							LastName = employee.LastName,
+							FirstName = employee.FirstName,
+							Patronymic = employee.Patronymic
 						});
 				}
 			}
@@ -97,11 +103,31 @@ namespace Recognizer.Database.Data
 	}
 
 	/// <summary> Запись из таблицы с сотрудниками. </summary>
-	public class EmployeesLogRecord 
+	public class EmployeesLogRecord
 	{
-		public string Record { get; set; }
+		#region .ctor
+		static EmployeesLogRecord()
+		{
+			СolumnNames = new string[] {
+				"Id", "Фамилия", "Имя", "Отчество"};
+		}
+		#endregion
 
-		public override string ToString() => Record;
+		#region Properties
+		public long Id { get; set; }
+
+		public string LastName { get; set; }
+
+		public string FirstName { get; set; }
+
+		public string Patronymic { get; set; }
+
+		public static string[] СolumnNames { get; }
+		#endregion
+
+		#region Methods
+		public override string ToString() => $"{LastName} {FirstName} {Patronymic}"; 
+		#endregion
 	}
 
 	/// <summary> Фильтр записей из базы данных по метке <paramref name="PersonLabel"/>. </summary>

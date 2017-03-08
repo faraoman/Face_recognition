@@ -8,12 +8,12 @@ namespace Recognizer.Recognition
 {
 	public class FaceRecognizedEventArgs : EventArgs
 	{
-		public FaceRecognizedEventArgs(string fullName)
+		public FaceRecognizedEventArgs(int label)
 		{
-			Verify.Argument.IsNeitherNullNorEmpty(fullName, nameof(fullName));
+			Label = label;
 		}
 
-		public string FullName { get; }
+		public int Label { get; }
 	}
 
 	/// <summary> 
@@ -22,7 +22,25 @@ namespace Recognizer.Recognition
 	/// </summary>
 	public class LBPFaceRecognizer
 	{
+		#region Data
+		private FaceRecognizer _recognizer;
+		#endregion
+
+		#region Events
 		public event EventHandler<FaceRecognizedEventArgs> FaceRecognized;
+		#endregion
+
+		#region .ctor
+
+		public LBPFaceRecognizer()
+		{
+			_recognizer = FaceRecognizer
+				.CreateLBPHFaceRecognizer(radius: 1, neighbors: 8, gridX: 8, gridY: 8, threshold: 80);
+		}
+
+		#endregion
+
+		#region Handlers
 
 		private void OnFaceRecognized(FaceRecognizedEventArgs e)
 		{
@@ -31,14 +49,9 @@ namespace Recognizer.Recognition
 			FaceRecognized?.Invoke(this, e);
 		}
 
+		#endregion
 
-		private FaceRecognizer _recognizer;
-
-		public LBPFaceRecognizer()
-		{
-			_recognizer = FaceRecognizer
-				.CreateLBPHFaceRecognizer(radius: 1, neighbors: 8, gridX: 8, gridY: 8, threshold: 80);
-		}
+		#region Methods
 
 		public void Train(IEnumerable<Mat> images, IEnumerable<int> labels)
 		{
@@ -68,7 +81,7 @@ namespace Recognizer.Recognition
 			// "Уверенность"
 			double confidence = 0.0;
 
-			// Если confidence меньше чем величина threshold, то считается, что лицо распознано.
+			// Если confidence меньше, чем величина threshold, то считается, что лицо распознано.
 			_recognizer.Predict(src: image,
 				label: out label,
 				confidence: out confidence);
@@ -89,13 +102,26 @@ namespace Recognizer.Recognition
 				case 4:
 					name = "Matvey";
 					break;
+
+				case 7:
+					name = "Valery";
+					break;
+			}
+
+			if(label != -1)
+			{
+				OnFaceRecognized(new FaceRecognizedEventArgs(label));
 			}
 
 			Debug.WriteLine($"Label:{label}, this is {name}. Confidence is {confidence}");
 
-			OnFaceRecognized(new FaceRecognizedEventArgs(name));
-
 			return label;
 		}
+
+		public void Update(IEnumerable<Mat> images, IEnumerable<int> labels)
+		{
+			_recognizer.Update(images, labels);
+		}
+		#endregion
 	}
 }
