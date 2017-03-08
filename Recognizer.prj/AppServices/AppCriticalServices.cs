@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System.IO;
+using Autofac;
 using Mallenom;
 using Mallenom.AppServices;
 using Mallenom.Diagnostics.Logs;
@@ -13,11 +14,9 @@ namespace Recognizer
 		private readonly IApplicationProfileDirectory _dbDirectory;
 
 		private readonly ILoggingService _loggingService;
+		private readonly ILog _log;
 
-		IAppender[] appenders = new Appender[]
-		{
-			new LogViewAppender(102400, "logView")
-		};
+		private const string DefaultFileName = "logs.log";
 
 		public AppCriticalServices()
 		{
@@ -25,7 +24,18 @@ namespace Recognizer
 			_logsDirectory = DefaultLogger.LogDirectory;
 			_dbDirectory = Services.DatabaseDirectory;
 
-			_loggingService = new LoggingService(_logsDirectory, "logs.log", appenders);
+			var fileAppender = new FileAppender(Path.Combine(_logsDirectory.FullPath, DefaultFileName))
+			{
+				MaxFileCount = 4,
+				MaxFileSize = 1024 * 1024 * 10,
+				Layout = new FileLayout()
+			};
+
+			var logViewAppender = new LogViewAppender(1024 * 1024 * 10, "LogViewApender");
+
+			_loggingService = new LoggingService(_logsDirectory, DefaultFileName, fileAppender, logViewAppender);
+
+			_log = LogManager.GetLog(typeof(LoggingService));
 		}
 
 		public void Register(ContainerBuilder builder)
@@ -39,7 +49,11 @@ namespace Recognizer
 
 			builder
 				.RegisterInstance(_loggingService)
-				.AsSelf();
+				.As<ILoggingService>();
+
+			builder
+				.RegisterInstance(_log)
+				.As<ILog>();
 
 			builder
 				.RegisterInstance(_logsDirectory)

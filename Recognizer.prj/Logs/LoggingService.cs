@@ -109,7 +109,7 @@ namespace Recognizer.Logs
 
 			Directory.EnsureExists();
 
-			RegisterDefaultFileAppenders(_defaultFileName);
+			//RegisterDefaultFileAppenders(_defaultFileName);
 			WriteStartupMessages();
 		}
 
@@ -127,7 +127,7 @@ namespace Recognizer.Logs
 		/// <summary>Выводит сообщения о запуске программы.</summary>
 		private static void WriteStartupMessages()
 		{
-			// Log.Info(Доброе утро)
+			Log.Info("Доброе утро");
 		}
 
 		/// <summary>Регистрирует аппендер для лога.</summary>

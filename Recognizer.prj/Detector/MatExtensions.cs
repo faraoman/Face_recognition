@@ -51,5 +51,25 @@ namespace Recognizer.Detector
 
 			return src;
 		}
+
+		public static double AverageBrightness(this Mat srcImgMat)
+		{
+			//srcImgMat.CvtColor(ColorConversion.GrayToBgr, 3);
+			double brightness = 0;
+
+			for(int i = 0; i < srcImgMat.Height; ++i)
+			{
+				for(int j = 0; j < srcImgMat.Width; ++j)
+				{
+					int b = srcImgMat.At<Vec3b>(i, j)[0],
+						g = srcImgMat.At<Vec3b>(i, j)[1],
+						r = srcImgMat.At<Vec3b>(i, j)[2];
+
+					brightness += (b + g + r) / 3.0;
+				}
+			}
+
+			return brightness / (srcImgMat.Height * srcImgMat.Width);
+		}
 	}
 }
