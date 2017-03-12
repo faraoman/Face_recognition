@@ -40,7 +40,6 @@ namespace Recognizer
 
 			containerBuilder
 				.RegisterType<LBPFaceRecognizer>()
-				.SingleInstance()
 				.AsSelf();
 
 			containerBuilder
@@ -52,8 +51,7 @@ namespace Recognizer
 			/**/
 			containerBuilder
 				.RegisterType<DXCaptureSourceProvider>()
-				.As<IVideoSourceProvider>()
-				.SingleInstance();
+				.As<IVideoSourceProvider>();
 			/**/
 
 			containerBuilder

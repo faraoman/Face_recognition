@@ -187,7 +187,7 @@ namespace Recognizer
 				filter.PersonLabel = e.Label;
 
 				var employeeRecord = employeeLogRepository.FetchRecords(filter)[0];
-				var resultStr = "Распознан " + employeeRecord;
+				var resultStr = "Распознан " + employeeRecord + ". Уверенность: " + e.Confidence;
 
 				Log.Info(resultStr);
 			}
