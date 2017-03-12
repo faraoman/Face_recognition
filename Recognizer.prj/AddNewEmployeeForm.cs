@@ -350,23 +350,6 @@ namespace Recognizer
 			}
 		}
 
-
-		/**
-		 * 
-		 * По кнопке "добавить":
-		 * Проверять, сделано ли изображение, по которому будет найдена гистограмма. Затем обновлять.xml-файл с гистограммами
-		 * и заносить сотрудника в БД, "синхронизировав" метки в .xml и в БД. (как это сделать - не знаю, но подозреваю:
-		 * 
-		 * 1) что можно где-то последнюю записанную в .xml-файл метку хранить в виде документа, будь то конфиг-файл или тупо
-		 * текстовый/бинарный прямо в папке с .exe
-		 * 
-		 * 2) возможно есть метод, который берет метку или список меток из .xml, смотреть на максимульную из них и инкрементировать
-		 * ее при добавлении
-		 * 
-		 * 3) искать вручную в файле секцию с метками, брать список, брать наибольшую = своя реализация пункта 2.
-		 * В последних двух возможна проблема залоченного файла = кто-то его уже использует (пишет/читает), хотя не думаю, что такое сильно возможно) )
-		 * 
-		/**/
 		private void OnButtonAddNewEmployee_Click(object sender, EventArgs e)
 		{
 			if (IsPictureTaken)
@@ -429,8 +412,7 @@ namespace Recognizer
 					return;
 				}
 
-				//employeeLogRepository.AddRecord(employee);
-
+				employeeLogRepository.AddRecord(employee);
 
 				_recognizer.Update(PictureTaken, maxLabel + 1);
 
@@ -442,7 +424,7 @@ namespace Recognizer
 
 				Log.Info("Запись добавлена");
 
-				//_recognizer.Load(dest);
+				_recognizer.Load(dest);
 				this.Close();
 			}
 			catch(Exception exc)
@@ -467,8 +449,6 @@ namespace Recognizer
 
 				foreach(var face in detector.FacesRepository)
 				{
-					//var matrix = face;
-
 					var showingMatrix = face
 						.CvtColor(ColorConversion.GrayToBgr)
 						.ToImage();

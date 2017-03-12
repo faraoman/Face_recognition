@@ -359,6 +359,8 @@ namespace Recognizer
 			_videoSource.Stop();
 			_videoSource.Close();
 
+			var state = _videoSource.State;
+
 			if(_videoSource != null)
 			{
 				_videoSource.DetachAllMatrices();
