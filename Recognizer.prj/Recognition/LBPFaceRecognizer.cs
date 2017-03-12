@@ -88,26 +88,6 @@ namespace Recognizer.Recognition
 
 			string name = string.Empty;
 
-			switch(label)
-			{
-				default:
-					name = "unknown person";
-					break;
-				case 1:
-					name = "Pavel";
-					break;
-				case 3:
-					name = "Andrey";
-					break;
-				case 4:
-					name = "Matvey";
-					break;
-
-				case 7:
-					name = "Valery";
-					break;
-			}
-
 			if(label != -1)
 			{
 				OnFaceRecognized(new FaceRecognizedEventArgs(label));
@@ -122,6 +102,12 @@ namespace Recognizer.Recognition
 		{
 			_recognizer.Update(images, labels);
 		}
+
+		public void Update(Mat image, long label)
+		{
+			_recognizer.Update(new List<Mat> { image }, new List<int> { (int) label });
+		}
+
 		#endregion
 	}
 }

@@ -1,5 +1,8 @@
-﻿using OpenCvSharp;
+﻿using System;
+using System.Collections.Generic;
+using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
+using Mallenom.Imaging;
 
 namespace Recognizer.Detector
 {
@@ -54,7 +57,6 @@ namespace Recognizer.Detector
 
 		public static double AverageBrightness(this Mat srcImgMat)
 		{
-			//srcImgMat.CvtColor(ColorConversion.GrayToBgr, 3);
 			double brightness = 0;
 
 			for(int i = 0; i < srcImgMat.Height; ++i)
@@ -70,6 +72,53 @@ namespace Recognizer.Detector
 			}
 
 			return brightness / (srcImgMat.Height * srcImgMat.Width);
+		}
+
+		public static Mat GetGammaExpo(int step)
+		{
+			Mat result = new Mat(1, 256, MatType.CV_8UC1);
+
+			for(int j = 0; j < 256; j++)
+			{
+				byte b = result.At<Vec3b>(j)[0],
+				g = result.At<Vec3b>(j)[1],
+				r = result.At<Vec3b>(j)[2];
+
+				b = AddDoubleToByte(b, Math.Sin(j * 0.01255) * step * 10);
+				g = AddDoubleToByte(g, Math.Sin(j * 0.01255) * step * 10);
+				r = AddDoubleToByte(r, Math.Sin(j * 0.01255) * step * 10);
+
+				result.Set(j, new Vec3b(b, g, r));
+			}
+
+			return result;
+		}
+
+		private static byte AddDoubleToByte(byte bt, double d)
+		{
+			if((int)(bt + d) > 255) bt = 255;
+			else if((int)(bt + d) < 0) bt = 0;
+			else bt += (byte) Math.Round(d);
+			
+			return bt;
+		}
+
+		public static Mat NormalizeBrightness(this Mat srcImgMat, double imgBrightness)
+		{
+			return srcImgMat = srcImgMat * (100.0 / imgBrightness);
+		}
+
+		public static IImageMatrix ToImage(this Mat mat)
+		{
+			var colorMatrix = new ColorMatrix(mat.Width, mat.Height);
+
+			using(var matrixData = colorMatrix.LockData())
+			{
+				Native
+					.Kernel32
+					.CopyMemory(matrixData.Scan0, mat.Data, matrixData.Stride * matrixData.Height);
+			}
+			return colorMatrix;
 		}
 	}
 }

@@ -43,6 +43,18 @@ namespace Recognizer.Database.Data
 			}
 		}
 
+		public long findMaxLabel()
+		{
+			using(var dbContext = DbContextFactory.CreateContext())
+			{
+				var label = dbContext
+					.Set<Employee>()
+					.Max(e => e.PersonLabel);
+
+				return label;
+			}
+		}
+
 		/// <summary> Выполняет запрос к базе данных и достаёт оттуда все записи. </summary>
 		/// <returns> Возвращает список cо всеми записями из БД. </returns>
 		public IReadOnlyList<EmployeesLogRecord> FetchRecords()

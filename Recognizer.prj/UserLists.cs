@@ -65,7 +65,7 @@ namespace Recognizer
 
 				catch(Exception exc)
 				{
-					//Log.Error("Database initialization error", exc);
+					Log.Error("Database initialization error", exc);
 				}
 			});
 		}
