@@ -39,6 +39,7 @@
 			this._labelPatronymic = new System.Windows.Forms.Label();
 			this._btnTakePicture = new System.Windows.Forms.Button();
 			this._btnDropPicture = new System.Windows.Forms.Button();
+			this._btnPictureFromFile = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -147,11 +148,22 @@
 			this._btnDropPicture.UseVisualStyleBackColor = true;
 			this._btnDropPicture.Click += new System.EventHandler(this.OnButtonDropPicture_Click);
 			// 
+			// _btnPictureFromFile
+			// 
+			this._btnPictureFromFile.Location = new System.Drawing.Point(500, 71);
+			this._btnPictureFromFile.Name = "_btnPictureFromFile";
+			this._btnPictureFromFile.Size = new System.Drawing.Size(123, 23);
+			this._btnPictureFromFile.TabIndex = 9;
+			this._btnPictureFromFile.Text = "Из файла";
+			this._btnPictureFromFile.UseVisualStyleBackColor = true;
+			this._btnPictureFromFile.Click += new System.EventHandler(this.OnButtonPictureFromFile_Click);
+			// 
 			// AddNewEmployeeForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(628, 323);
+			this.Controls.Add(this._btnPictureFromFile);
 			this.Controls.Add(this._btnDropPicture);
 			this.Controls.Add(this._btnTakePicture);
 			this.Controls.Add(this._labelPatronymic);
@@ -184,5 +196,6 @@
 		private System.Windows.Forms.Label _labelFirstname;
 		private System.Windows.Forms.Button _btnDropPicture;
 		private System.Windows.Forms.Button _btnTakePicture;
+		private System.Windows.Forms.Button _btnPictureFromFile;
 	}
 }

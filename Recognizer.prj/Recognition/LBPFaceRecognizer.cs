@@ -8,12 +8,14 @@ namespace Recognizer.Recognition
 {
 	public class FaceRecognizedEventArgs : EventArgs
 	{
-		public FaceRecognizedEventArgs(int label)
+		public FaceRecognizedEventArgs(int label, double confidence)
 		{
 			Label = label;
+			Confidence = confidence;
 		}
 
 		public int Label { get; }
+		public double Confidence { get; }
 	}
 
 	/// <summary> 
@@ -90,7 +92,7 @@ namespace Recognizer.Recognition
 
 			if(label != -1)
 			{
-				OnFaceRecognized(new FaceRecognizedEventArgs(label));
+				OnFaceRecognized(new FaceRecognizedEventArgs(label, confidence));
 			}
 
 			Debug.WriteLine($"Label:{label}, this is {name}. Confidence is {confidence}");

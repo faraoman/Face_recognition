@@ -302,11 +302,12 @@ namespace Recognizer
 			{
 				lock(this)
 				{
-					_recognizer.Recognize(face);
+					//_recognizer.Recognize(face);
 
-					double avgBrightness = face.AverageBrightness();
+					//double avgBrightness = face.AverageBrightness();
 
-					Log.Info(avgBrightness);
+					//Log.Info(avgBrightness);
+					PictureTaken = face;
 				}
 			}
 
@@ -317,11 +318,12 @@ namespace Recognizer
 
 		private void OnButtonTakePicture_Click(object sender, EventArgs e)
 		{
-			if(_detector.FaceCounter == 1)
+			if(/*_detector.FaceCounter == 1*/ PictureTaken != null)
 			{
 
 				_frameImage.Frames.Clear();
-				var imageMatrix = _detector.FacesRepository[0];
+				//var imageMatrix = _detector.FacesRepository[0];
+				var imageMatrix = PictureTaken;
 
 				_videoSource.Stop();
 
@@ -369,7 +371,7 @@ namespace Recognizer
 		{
 			if (IsPictureTaken)
 			{
-				if(true/*_recognizer.Recognize(PictureTaken) != -1*/)
+				if(_recognizer.Recognize(PictureTaken) != -1)
 				{
 					switch(MessageBox.Show("Возможно, что лицо уже есть в базе. Продолжить?", "", MessageBoxButtons.YesNo))
 					{
@@ -390,6 +392,15 @@ namespace Recognizer
 
 			}
 			
+		}
+
+		private void InitXmlFile(Mat img, long label)
+		{
+			_recognizer.Train(new List<Mat> { img }, new List<int> { (int) label });
+			_recognizer.Save(Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Samples",
+					"initialized.xml"));
 		}
 
 		private void AddEmployee()
@@ -416,22 +427,61 @@ namespace Recognizer
 				{
 					MessageBox.Show(this, "Заполните все поля", "Ахтунг!", MessageBoxButtons.OK);
 					return;
-				}				
+				}
 
-				employeeLogRepository.AddRecord(employee);
+				//employeeLogRepository.AddRecord(employee);
+
 
 				_recognizer.Update(PictureTaken, maxLabel + 1);
-				_recognizer.Save(Path.Combine(
+
+				string dest;
+				_recognizer.Save(dest = Path.Combine(
 						Directory.GetCurrentDirectory(),
 						"Samples",
 						"LBPFaces.xml"));
 
 				Log.Info("Запись добавлена");
+
+				//_recognizer.Load(dest);
 				this.Close();
 			}
 			catch(Exception exc)
 			{
 				Log.Error("Ошибка в запросе к БД", exc);
+			}
+		}
+
+		private void OnButtonPictureFromFile_Click(object sender, EventArgs e)
+		{
+			OpenFileDialog openFile = new OpenFileDialog();
+			openFile.Title = "Выберите картинку";
+			openFile.InitialDirectory = Path.Combine(
+					Directory.GetCurrentDirectory(),
+					"Photo");
+			openFile.Filter = "Images|*.jpg;*.png;*.bmp|All files|*.*";
+
+			if(openFile.ShowDialog() == DialogResult.OK)
+			{
+				var detector = new FaceDetector(openFile.FileName);
+				detector.DetectFaces();
+
+				foreach(var face in detector.FacesRepository)
+				{
+					//var matrix = face;
+
+					var showingMatrix = face
+						.CvtColor(ColorConversion.GrayToBgr)
+						.ToImage();
+
+					_frameImage.Matrix = showingMatrix;
+
+					IsPictureTaken = true;
+					PictureTaken = face;
+
+					break;
+				}
+
+				
 			}
 		}
 	}

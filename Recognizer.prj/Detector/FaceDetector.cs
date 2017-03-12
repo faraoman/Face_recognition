@@ -10,8 +10,8 @@ namespace Recognizer.Detector
 	public sealed class FaceDetector
 	{
 		#region Constants
-		private const int IMG_WIDTH = 300;
-		private const int IMG_HEIGHT = 300; 
+		private const int IMG_WIDTH = 120;
+		private const int IMG_HEIGHT = 120; 
 		#endregion
 
 		#region .ctor
