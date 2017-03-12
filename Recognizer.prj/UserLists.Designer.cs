@@ -37,6 +37,7 @@ namespace Recognizer
 			// 
 			// _btnAddEmployee
 			// 
+			this._btnAddEmployee.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnAddEmployee.Location = new System.Drawing.Point(383, 12);
 			this._btnAddEmployee.Name = "_btnAddEmployee";
 			this._btnAddEmployee.Size = new System.Drawing.Size(179, 23);
@@ -50,6 +51,9 @@ namespace Recognizer
 			this._dataGridView.AllowUserToAddRows = false;
 			this._dataGridView.AllowUserToDeleteRows = false;
 			this._dataGridView.AllowUserToResizeRows = false;
+			this._dataGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._dataGridView.Location = new System.Drawing.Point(12, 12);
 			this._dataGridView.Name = "_dataGridView";
 			this._dataGridView.ReadOnly = true;
