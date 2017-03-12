@@ -145,7 +145,7 @@ namespace Mallenom
   ///   private string _name;
   ///   public string Name {
   ///     get { return _name; }
-  ///     set { _name = value; NotifyChanged("LastName"); /* Warning */ }
+  ///     set { _name = value; NotifyChanged("LastNameText"); /* Warning */ }
   ///   }
   /// }
   /// </code>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -13,9 +14,12 @@ using Mallenom;
 using Mallenom.Diagnostics.Logs;
 using Mallenom.Imaging;
 using Mallenom.Video;
+using Mallenom.Video.DirectShow;
+using OpenCvSharp;
 using OpenCvSharp.CPlusPlus;
 using Recognizer.Database.Data;
 using Recognizer.Detector;
+using Recognizer.Entities;
 using Recognizer.Recognition;
 
 namespace Recognizer
@@ -33,14 +37,12 @@ namespace Recognizer
 		private FaceDetector _detector;
 		private LBPFaceRecognizer _recognizer;
 
-		//private RecognitionLogController _recognitionLogController;
-
 		private int _frameCounter;
 		private int _skipFrames = 5;
 
 		#endregion
 
-
+		/**/
 		public AddNewEmployeeForm()
 		{
 			InitializeComponent();
@@ -59,15 +61,62 @@ namespace Recognizer
 			_container = container;
 
 			Log = _container.Resolve<ILog>();
+			IsPictureTaken = false;
 
 			InitializeRecognizer();
 			InitializeVideoSource();
 		}
+
+		//public AddNewEmployeeForm(IComponentContext container, IVideoSourceProvider provider)
+		//{
+		//	Verify.Argument.IsNotNull(container, nameof(container));
+		//	Verify.Argument.IsNotNull(provider, nameof(provider));
+
+		//	InitializeComponent();
+		//	this.FormClosing += OnAddNewEmployeeFormClosing;
+
+		//	_container = container;
+		//	_videoSourceProvider = provider;
+
+		//	Log = _container.Resolve<ILog>();
+
+		//	InitializeRecognizer();
+		//	InitializeVideoSource();
+		//}
+
 		#endregion
 
 		#region Properties
 
 		ILog Log { get; }
+
+		bool IsPictureTaken { get; set; }
+
+		Mat PictureTaken { get; set; }
+
+		string FirstNameText
+		{
+			get
+			{
+				return _textBoxFirstname.Text;
+			}
+		}
+
+		string LastNameText
+		{
+			get
+			{
+				return _textBoxLastname.Text;
+			}
+		}
+
+		string PatronymicText
+		{
+			get
+			{
+				return _textBoxPatronymic.Text;
+			}
+		}
 
 		#endregion
 
@@ -89,9 +138,8 @@ namespace Recognizer
 
 		private void InitializeVideoSource()
 		{
-			_videoSourceProvider = _container.Resolve<IVideoSourceProvider>();
+			_videoSourceProvider = new DXCaptureSourceProvider();
 			_videoSource = _videoSourceProvider.CreateVideoSource();
-
 			_matrix = new ColorMatrix();
 
 			_frameImage.Matrix = _matrix;
@@ -160,6 +208,8 @@ namespace Recognizer
 			{
 				_videoSource.DetachAllMatrices();
 				_videoSource.MatrixUpdated -= OnMatrixUpdated;
+				_videoSource.Stop();
+				_videoSource.Close();
 			}
 
 			_recognizer.FaceRecognized -= OnFaceRecognized;
@@ -193,7 +243,6 @@ namespace Recognizer
 				mi();
 			}
 
-			/**/
 			if(_frameCounter >= _skipFrames)
 			{
 				//устанавливаем кадр, который требуется проанализировать
@@ -225,7 +274,6 @@ namespace Recognizer
 				_frameCounter = 0;
 			}
 			_frameCounter++;
-			/**/
 		}
 
 		private Rect Shakalization(Rect rect)
@@ -267,11 +315,124 @@ namespace Recognizer
 					.Clear();
 		}
 
-		private void OnExitToolStripMenuItem_Click(object sender, EventArgs e)
+		private void OnButtonTakePicture_Click(object sender, EventArgs e)
 		{
-			this.Close();
+			if(_detector.FaceCounter == 1)
+			{
+
+				_frameImage.Frames.Clear();
+				var imageMatrix = _detector.FacesRepository[0];
+
+				_videoSource.Stop();
+
+				var showingMatrix = imageMatrix
+					.CvtColor(ColorConversion.GrayToBgr)
+					.ToImage();
+
+				_frameImage.Matrix = showingMatrix;
+
+				IsPictureTaken = true;
+				PictureTaken = imageMatrix;
+			}
 		}
 
 		#endregion
+
+		private void OnButtonDropPicture_Click(object sender, EventArgs e)
+		{
+			if(_videoSource.State != VideoSourceState.Running)
+			{
+				_frameImage.Matrix = _matrix;
+				_videoSource.Start();
+				IsPictureTaken = false;
+			}
+		}
+
+
+		/**
+		 * 
+		 * По кнопке "добавить":
+		 * Проверять, сделано ли изображение, по которому будет найдена гистограмма. Затем обновлять.xml-файл с гистограммами
+		 * и заносить сотрудника в БД, "синхронизировав" метки в .xml и в БД. (как это сделать - не знаю, но подозреваю:
+		 * 
+		 * 1) что можно где-то последнюю записанную в .xml-файл метку хранить в виде документа, будь то конфиг-файл или тупо
+		 * текстовый/бинарный прямо в папке с .exe
+		 * 
+		 * 2) возможно есть метод, который берет метку или список меток из .xml, смотреть на максимульную из них и инкрементировать
+		 * ее при добавлении
+		 * 
+		 * 3) искать вручную в файле секцию с метками, брать список, брать наибольшую = своя реализация пункта 2.
+		 * В последних двух возможна проблема залоченного файла = кто-то его уже использует (пишет/читает), хотя не думаю, что такое сильно возможно) )
+		 * 
+		/**/
+		private void OnButtonAddNewEmployee_Click(object sender, EventArgs e)
+		{
+			if (IsPictureTaken)
+			{
+				if(true/*_recognizer.Recognize(PictureTaken) != -1*/)
+				{
+					switch(MessageBox.Show("Возможно, что лицо уже есть в базе. Продолжить?", "", MessageBoxButtons.YesNo))
+					{
+						case DialogResult.Yes:
+							{
+								AddEmployee();
+								break;
+							}
+						case DialogResult.No:
+							{
+								this.Close();
+								return;
+							}
+					}
+				}
+
+				else AddEmployee();
+
+			}
+			
+		}
+
+		private void AddEmployee()
+		{
+			try
+			{
+				var employeeLogRepository = _container.Resolve<EmployeesLogRepository>();
+				Employee employee;
+				long maxLabel = -1;
+
+				if(FirstNameText != string.Empty && LastNameText != string.Empty && PatronymicText != string.Empty)
+				{
+					maxLabel = employeeLogRepository.findMaxLabel();
+
+					employee = new Employee
+					{
+						FirstName = FirstNameText,
+						LastName = LastNameText,
+						Patronymic = PatronymicText,
+						PersonLabel = maxLabel + 1
+					};
+				}
+				else
+				{
+					MessageBox.Show(this, "Заполните все поля", "Ахтунг!", MessageBoxButtons.OK);
+					return;
+				}				
+
+				employeeLogRepository.AddRecord(employee);
+
+				_recognizer.Update(PictureTaken, maxLabel + 1);
+				_recognizer.Save(Path.Combine(
+						Directory.GetCurrentDirectory(),
+						"Samples",
+						"LBPFaces.xml"));
+
+				Log.Info("Запись добавлена");
+				this.Close();
+			}
+			catch(Exception exc)
+			{
+				Log.Error("Ошибка в запросе к БД", exc);
+			}
+		}
 	}
 }

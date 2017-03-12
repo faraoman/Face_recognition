@@ -136,6 +136,14 @@ namespace Recognizer.Detector
 		/// </summary>
 		public List<Mat> FacesRepository { get; set; }
 
+		public int FaceCounter
+		{
+			get
+			{
+				return FacesRepository.Count;
+			}
+		}
+
 		#endregion
 
 		#region Methods
@@ -209,6 +217,29 @@ namespace Recognizer.Detector
 				OutputMatrix = InputMatrix.Clone();
 			}
 		}
+
+		/// <summary>
+		/// Обновляет .xml-файл детектора. 
+		/// </summary>
+		public void UpdateDetector()
+		{
+			Classifier.Dispose();
+			Classifier = new CascadeClassifier(
+			 Path.Combine(
+			  Directory.GetCurrentDirectory(),
+			  "Samples",
+			  "haarcascade_frontalface_default.xml"));
+		}
+
+		/// <summary>
+		/// Обновляет .xml-файл детектора. 
+		/// </summary>
+		public void UpdateDetector(string path)
+		{
+			Classifier.Dispose();
+			Classifier = new CascadeClassifier(path);
+		}
+
 		#endregion
 
 	}

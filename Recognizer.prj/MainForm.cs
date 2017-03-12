@@ -145,13 +145,25 @@ namespace Recognizer
 		{
 			foreach(var face in _detector.FacesRepository)
 			{
+				//double avgBrightness = face.AverageBrightness();
+
+				//Mat mat = face.NormalizeBrightness(avgBrightness);
+
+				//using(var w = new Window(face))
+				//{
+				//	Cv.WaitKey();
+				//}
+				//using(var w = new Window(mat))
+				//{
+				//	Cv.WaitKey();
+				//}
+
 				lock(this)
 				{
 					_recognizer.Recognize(face);
 
-					double avgBrightness = face.AverageBrightness();
-
-					Log.Info(avgBrightness);
+					//Log.Info(avgBrightness);
+					//Log.Info(mat.AverageBrightness());
 				}
 			}
 
@@ -191,6 +203,7 @@ namespace Recognizer
 			{
 				_videoSource.DetachAllMatrices();
 				_videoSource.MatrixUpdated -= OnMatrixUpdated;
+				_videoSource.Close();
 			}
 
 			_recognizer.FaceRecognized -= OnFaceRecognized;
@@ -357,16 +370,15 @@ namespace Recognizer
 			using(var formLists = new UserLists(_container))
 			{
 				formLists.ShowDialog(this);
-				
 			}
-			_videoSource.Open();
-			_videoSource.Start();
 
-			_videoSource.AttachMatrix(_matrix);
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
 			_recognizer.FaceRecognized += OnFaceRecognized;
 
+			_videoSource.AttachMatrix(_matrix);
 
+			_videoSource.Open();
+			_videoSource.Start();
 		}
 
 		#endregion

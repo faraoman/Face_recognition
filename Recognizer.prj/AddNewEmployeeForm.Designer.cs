@@ -62,6 +62,7 @@
 			// 
 			// _textBoxFirstname
 			// 
+			this._textBoxFirstname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._textBoxFirstname.Location = new System.Drawing.Point(500, 117);
 			this._textBoxFirstname.Name = "_textBoxFirstname";
 			this._textBoxFirstname.Size = new System.Drawing.Size(123, 20);
@@ -69,6 +70,7 @@
 			// 
 			// _textBoxLastname
 			// 
+			this._textBoxLastname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._textBoxLastname.Location = new System.Drawing.Point(500, 165);
 			this._textBoxLastname.Name = "_textBoxLastname";
 			this._textBoxLastname.Size = new System.Drawing.Size(123, 20);
@@ -76,6 +78,7 @@
 			// 
 			// _textBoxPatronymic
 			// 
+			this._textBoxPatronymic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._textBoxPatronymic.Location = new System.Drawing.Point(500, 213);
 			this._textBoxPatronymic.Name = "_textBoxPatronymic";
 			this._textBoxPatronymic.Size = new System.Drawing.Size(123, 20);
@@ -83,15 +86,18 @@
 			// 
 			// _btnAddNewEmployee
 			// 
+			this._btnAddNewEmployee.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnAddNewEmployee.Location = new System.Drawing.Point(500, 286);
 			this._btnAddNewEmployee.Name = "_btnAddNewEmployee";
 			this._btnAddNewEmployee.Size = new System.Drawing.Size(123, 23);
 			this._btnAddNewEmployee.TabIndex = 5;
 			this._btnAddNewEmployee.Text = "Добавить";
 			this._btnAddNewEmployee.UseVisualStyleBackColor = true;
+			this._btnAddNewEmployee.Click += new System.EventHandler(this.OnButtonAddNewEmployee_Click);
 			// 
 			// _labelFirstname
 			// 
+			this._labelFirstname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._labelFirstname.AutoSize = true;
 			this._labelFirstname.Location = new System.Drawing.Point(500, 101);
 			this._labelFirstname.Name = "_labelFirstname";
@@ -101,6 +107,7 @@
 			// 
 			// _labelLastname
 			// 
+			this._labelLastname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._labelLastname.AutoSize = true;
 			this._labelLastname.Location = new System.Drawing.Point(500, 149);
 			this._labelLastname.Name = "_labelLastname";
@@ -110,6 +117,7 @@
 			// 
 			// _labelPatronymic
 			// 
+			this._labelPatronymic.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._labelPatronymic.AutoSize = true;
 			this._labelPatronymic.Location = new System.Drawing.Point(497, 197);
 			this._labelPatronymic.Name = "_labelPatronymic";
@@ -119,21 +127,25 @@
 			// 
 			// _btnTakePicture
 			// 
+			this._btnTakePicture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnTakePicture.Location = new System.Drawing.Point(500, 12);
 			this._btnTakePicture.Name = "_btnTakePicture";
 			this._btnTakePicture.Size = new System.Drawing.Size(123, 23);
 			this._btnTakePicture.TabIndex = 0;
 			this._btnTakePicture.Text = "Фото";
 			this._btnTakePicture.UseVisualStyleBackColor = true;
+			this._btnTakePicture.Click += new System.EventHandler(this.OnButtonTakePicture_Click);
 			// 
 			// _btnDropPicture
 			// 
+			this._btnDropPicture.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this._btnDropPicture.Location = new System.Drawing.Point(500, 41);
 			this._btnDropPicture.Name = "_btnDropPicture";
 			this._btnDropPicture.Size = new System.Drawing.Size(123, 23);
 			this._btnDropPicture.TabIndex = 1;
 			this._btnDropPicture.Text = "Сбросить";
 			this._btnDropPicture.UseVisualStyleBackColor = true;
+			this._btnDropPicture.Click += new System.EventHandler(this.OnButtonDropPicture_Click);
 			// 
 			// AddNewEmployeeForm
 			// 
