@@ -64,15 +64,15 @@
 			// _textBoxFirstname
 			// 
 			this._textBoxFirstname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this._textBoxFirstname.Location = new System.Drawing.Point(500, 117);
+			this._textBoxFirstname.Location = new System.Drawing.Point(500, 165);
 			this._textBoxFirstname.Name = "_textBoxFirstname";
 			this._textBoxFirstname.Size = new System.Drawing.Size(123, 20);
-			this._textBoxFirstname.TabIndex = 2;
+			this._textBoxFirstname.TabIndex = 4;
 			// 
 			// _textBoxLastname
 			// 
 			this._textBoxLastname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this._textBoxLastname.Location = new System.Drawing.Point(500, 165);
+			this._textBoxLastname.Location = new System.Drawing.Point(500, 117);
 			this._textBoxLastname.Name = "_textBoxLastname";
 			this._textBoxLastname.Size = new System.Drawing.Size(123, 20);
 			this._textBoxLastname.TabIndex = 3;
@@ -83,7 +83,7 @@
 			this._textBoxPatronymic.Location = new System.Drawing.Point(500, 213);
 			this._textBoxPatronymic.Name = "_textBoxPatronymic";
 			this._textBoxPatronymic.Size = new System.Drawing.Size(123, 20);
-			this._textBoxPatronymic.TabIndex = 4;
+			this._textBoxPatronymic.TabIndex = 5;
 			// 
 			// _btnAddNewEmployee
 			// 
@@ -91,7 +91,7 @@
 			this._btnAddNewEmployee.Location = new System.Drawing.Point(500, 286);
 			this._btnAddNewEmployee.Name = "_btnAddNewEmployee";
 			this._btnAddNewEmployee.Size = new System.Drawing.Size(123, 23);
-			this._btnAddNewEmployee.TabIndex = 5;
+			this._btnAddNewEmployee.TabIndex = 6;
 			this._btnAddNewEmployee.Text = "Добавить";
 			this._btnAddNewEmployee.UseVisualStyleBackColor = true;
 			this._btnAddNewEmployee.Click += new System.EventHandler(this.OnButtonAddNewEmployee_Click);
@@ -100,7 +100,7 @@
 			// 
 			this._labelFirstname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._labelFirstname.AutoSize = true;
-			this._labelFirstname.Location = new System.Drawing.Point(500, 101);
+			this._labelFirstname.Location = new System.Drawing.Point(500, 149);
 			this._labelFirstname.Name = "_labelFirstname";
 			this._labelFirstname.Size = new System.Drawing.Size(29, 13);
 			this._labelFirstname.TabIndex = 6;
@@ -110,7 +110,7 @@
 			// 
 			this._labelLastname.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this._labelLastname.AutoSize = true;
-			this._labelLastname.Location = new System.Drawing.Point(500, 149);
+			this._labelLastname.Location = new System.Drawing.Point(500, 101);
 			this._labelLastname.Name = "_labelLastname";
 			this._labelLastname.Size = new System.Drawing.Size(56, 13);
 			this._labelLastname.TabIndex = 7;
@@ -153,7 +153,7 @@
 			this._btnPictureFromFile.Location = new System.Drawing.Point(500, 71);
 			this._btnPictureFromFile.Name = "_btnPictureFromFile";
 			this._btnPictureFromFile.Size = new System.Drawing.Size(123, 23);
-			this._btnPictureFromFile.TabIndex = 9;
+			this._btnPictureFromFile.TabIndex = 2;
 			this._btnPictureFromFile.Text = "Из файла";
 			this._btnPictureFromFile.UseVisualStyleBackColor = true;
 			this._btnPictureFromFile.Click += new System.EventHandler(this.OnButtonPictureFromFile_Click);

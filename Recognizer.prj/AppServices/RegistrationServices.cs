@@ -44,7 +44,6 @@ namespace Recognizer
 
 			containerBuilder
 				.RegisterType<FrameImage>()
-				.SingleInstance()
 				.As<VideoImage>();
 
 			// webcam source
