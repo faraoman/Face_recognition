@@ -29,10 +29,9 @@ namespace Recognizer
 		#region Data
 
 		private IComponentContext _container;
-
-		private IVideoSourceProvider _videoSourceProvider;
-		private IVideoSource _videoSource;
 		private IImageMatrix _matrix;
+		//private IVideoSourceProvider _videoSourceProvider;
+		private IVideoSource _videoSource;
 
 		private FaceDetector _detector;
 		private LBPFaceRecognizer _recognizer;
@@ -51,7 +50,8 @@ namespace Recognizer
 
 
 		#region .ctor
-		public AddNewEmployeeForm(IComponentContext container)
+
+		public AddNewEmployeeForm(IComponentContext container, IVideoSource videoSource)
 		{
 			Verify.Argument.IsNotNull(container, nameof(container));
 
@@ -59,6 +59,7 @@ namespace Recognizer
 			this.FormClosing += OnAddNewEmployeeFormClosing;
 
 			_container = container;
+			_videoSource = videoSource;
 
 			Log = _container.Resolve<ILog>();
 			IsPictureTaken = false;
@@ -88,7 +89,7 @@ namespace Recognizer
 
 		#region Properties
 
-		ILog Log { get; }
+		private ILog Log { get; }
 
 		bool IsPictureTaken { get; set; }
 
@@ -121,6 +122,7 @@ namespace Recognizer
 		#endregion
 
 		#region Methods
+
 		private void InitializeRecognizer()
 		{
 			_detector = _container.Resolve<FaceDetector>();
@@ -138,8 +140,7 @@ namespace Recognizer
 
 		private void InitializeVideoSource()
 		{
-			_videoSourceProvider = new DXCaptureSourceProvider();
-			_videoSource = _videoSourceProvider.CreateVideoSource();
+			//_videoSourceProvider = _container.Resolve<IVideoSourceProvider>();
 			_matrix = new ColorMatrix();
 
 			_frameImage.Matrix = _matrix;
@@ -154,8 +155,20 @@ namespace Recognizer
 				_videoSource.Open();
 				_videoSource.Start();
 			}
-			catch
+			catch (Exception exc)
 			{
+				Log.Error("Не удалось открыть видеоисточник.", exc);
+			}
+		}
+
+		private void CloseVideoSource()
+		{
+			if (_videoSource != null)
+			{
+				_videoSource.DetachAllMatrices();
+				_videoSource.MatrixUpdated -= OnMatrixUpdated;
+				_videoSource.Stop();
+				_videoSource.Close();
 			}
 		}
 
@@ -204,13 +217,7 @@ namespace Recognizer
 
 		private void OnAddNewEmployeeFormClosing(object sender, FormClosingEventArgs e)
 		{
-			if(_videoSource != null)
-			{
-				_videoSource.DetachAllMatrices();
-				_videoSource.MatrixUpdated -= OnMatrixUpdated;
-				_videoSource.Stop();
-				_videoSource.Close();
-			}
+			CloseVideoSource();
 
 			_recognizer.FaceRecognized -= OnFaceRecognized;
 		}
@@ -342,7 +349,7 @@ namespace Recognizer
 
 		private void OnButtonDropPicture_Click(object sender, EventArgs e)
 		{
-			if(_videoSource.State != VideoSourceState.Running)
+			if(_videoSource.State == VideoSourceState.Opened && _videoSource.State != VideoSourceState.Running)
 			{
 				_frameImage.Matrix = _matrix;
 				_videoSource.Start();
@@ -372,7 +379,6 @@ namespace Recognizer
 				}
 
 				else AddEmployee();
-
 			}
 			
 		}
@@ -435,33 +441,33 @@ namespace Recognizer
 
 		private void OnButtonPictureFromFile_Click(object sender, EventArgs e)
 		{
-			OpenFileDialog openFile = new OpenFileDialog();
-			openFile.Title = "Выберите картинку";
-			openFile.InitialDirectory = Path.Combine(
-					Directory.GetCurrentDirectory(),
-					"Photo");
-			openFile.Filter = "Images|*.jpg;*.png;*.bmp|All files|*.*";
-
-			if(openFile.ShowDialog() == DialogResult.OK)
+			using(var openFileDlg = new OpenFileDialog())
 			{
-				var detector = new FaceDetector(openFile.FileName);
-				detector.DetectFaces();
+				openFileDlg.Title = "Выберите картинку";
+				openFileDlg.InitialDirectory = Path.Combine(
+						Directory.GetCurrentDirectory(),
+						"Photo");
+				openFileDlg.Filter = "Images|*.jpg;*.png;*.bmp|All files|*.*";
 
-				foreach(var face in detector.FacesRepository)
+				if (openFileDlg.ShowDialog(this) == DialogResult.OK)
 				{
-					var showingMatrix = face
-						.CvtColor(ColorConversion.GrayToBgr)
-						.ToImage();
+					var detector = new FaceDetector(openFileDlg.FileName);
+					detector.DetectFaces();
 
-					_frameImage.Matrix = showingMatrix;
+					foreach (var face in detector.FacesRepository)
+					{
+						var showingMatrix = face
+							.CvtColor(ColorConversion.GrayToBgr)
+							.ToImage();
 
-					IsPictureTaken = true;
-					PictureTaken = face;
+						_frameImage.Matrix = showingMatrix;
 
-					break;
+						IsPictureTaken = true;
+						PictureTaken = face;
+
+						break;
+					}
 				}
-
-				
 			}
 		}
 	}
