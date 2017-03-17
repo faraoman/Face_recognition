@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -61,11 +61,12 @@ namespace Recognizer
 
 		#region Properties
 
-		ILog Log { get; }
+		private ILog Log { get; }
 
 		#endregion
 
 		#region Methods
+
 		private void InitializeRecognizer()
 		{
 			_detector = _container.Resolve<FaceDetector>();
@@ -92,17 +93,45 @@ namespace Recognizer
 			_frameImage.ManualUpdateRendererCache = true;
 			_frameImage.SizeMode = ImageSizeMode.Zoom;
 
+			StartVideoSource();
+		}
+
+		private void CloseVideoSource()
+		{
+			if (_videoSource != null)
+			{
+				_videoSource.DetachAllMatrices();
+				_videoSource.MatrixUpdated -= OnMatrixUpdated;
+				_videoSource.Close();
+			}
+		}
+
+		private void StartVideoSource()
+		{
+			if (_videoSource == null || _videoSource.State == VideoSourceState.Running)
+				return;
+
 			_videoSource.AttachMatrix(_matrix);
 			_videoSource.MatrixUpdated += OnMatrixUpdated;
-
 			try
 			{
-				_videoSource.Open();
+				if (_videoSource.State == VideoSourceState.Closed)
+					_videoSource.Open();
 				_videoSource.Start();
 			}
-			catch
+			catch (Exception exc)
 			{
+				Log.Error("Не удалось открыть видеоисточник.", exc);
 			}
+		}
+
+		private void StopVideoSource()
+		{
+			if (_videoSource == null) return;
+
+			_videoSource.DetachAllMatrices();
+			_videoSource.MatrixUpdated -= OnMatrixUpdated;
+			_videoSource.Stop();
 		}
 
 		private void DrawRectangles(Rect[] rectangles)
@@ -199,12 +228,7 @@ namespace Recognizer
 
 		private void OnMainFormClosing(object sender, FormClosingEventArgs e)
 		{
-			if(_videoSource != null)
-			{
-				_videoSource.DetachAllMatrices();
-				_videoSource.MatrixUpdated -= OnMatrixUpdated;
-				_videoSource.Close();
-			}
+			CloseVideoSource();
 
 			_recognizer.FaceRecognized -= OnFaceRecognized;
 		}
@@ -274,66 +298,69 @@ namespace Recognizer
 
 		private void OnRecognizeByPhotoToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			_videoSource.Stop();
-			OpenFileDialog openFile = new OpenFileDialog();
-			openFile.Title = "Выберите картинку";
-			openFile.InitialDirectory = Path.Combine(
+			StopVideoSource();
+
+			using (var openFileDlg = new OpenFileDialog())
+			{ 
+				openFileDlg.Title = "Выберите картинку";
+				openFileDlg.InitialDirectory = Path.Combine(
 					Directory.GetCurrentDirectory(),
 					"Photo");
-			openFile.Filter = "Images|*.jpg;*.png;*.bmp|All files|*.*";
+				openFileDlg.Filter = "Images|*.jpg;*.png;*.bmp|All files|*.*";
 
-			if(openFile.ShowDialog() == DialogResult.OK)
-			{
-				/**/
-				var detector = new FaceDetector(openFile.FileName);
-
-				detector.DetectFaces();
-
-				var trainDataPath = Path.Combine(
-					Directory.GetCurrentDirectory(),
-					"Samples",
-					"LBPFaces.xml");
-
-				foreach(var face in detector.FacesRepository)
+				if (openFileDlg.ShowDialog(this) == DialogResult.OK)
 				{
-					int result = _recognizer.Recognize(face);
-					string resultStr = string.Empty;
+					/**/
+					var detector = new FaceDetector(openFileDlg.FileName);
 
-					if(result != -1)
+					detector.DetectFaces();
+
+					var trainDataPath = Path.Combine(
+						Directory.GetCurrentDirectory(),
+						"Samples",
+						"LBPFaces.xml");
+
+					foreach (var face in detector.FacesRepository)
 					{
-						try
+						int result = _recognizer.Recognize(face);
+						string resultStr = string.Empty;
+
+						if (result != -1)
 						{
-							var employeeLogRepository = _container.Resolve<EmployeesLogRepository>();
-							var filter = _container.Resolve<EmployeesLogRepositoryFilter>();
-							filter.PersonLabel = result;
+							try
+							{
+								var employeeLogRepository = _container.Resolve<EmployeesLogRepository>();
+								var filter = _container.Resolve<EmployeesLogRepositoryFilter>();
+								filter.PersonLabel = result;
 
-							var employeeRecord = employeeLogRepository.FetchRecords(filter)[0];
+								var employeeRecord = employeeLogRepository.FetchRecords(filter)[0];
 
-							resultStr = "Распознан " + employeeRecord;
+								resultStr = "Распознан " + employeeRecord;
+
+								Log.Info(resultStr);
+							}
+							catch (Exception exc)
+							{
+								Log.Error("Ошибка в запросе к БД", exc);
+							}
+						}
+
+						else
+						{
+							resultStr = "Лицо не распознано";
 
 							Log.Info(resultStr);
 						}
-						catch(Exception exc)
-						{
-							Log.Error("Ошибка в запросе к БД", exc);
-						}
+
+						MessageBox.Show(resultStr, "Recognizer", MessageBoxButtons.OK);
 					}
 
-					else
-					{
-						resultStr = "Лицо не распознано";
-
-						Log.Info(resultStr);
-					}
-
-					MessageBox.Show(resultStr, "Recognizer", MessageBoxButtons.OK);
+					detector
+						.FacesRepository
+						.Clear();
 				}
 
-				detector
-					.FacesRepository
-					.Clear();
-
-				_videoSource.Start();
+				StartVideoSource();
 			}
 		}
 
@@ -348,39 +375,43 @@ namespace Recognizer
 			{
 				if(setupForm.ShowDialog(this) == DialogResult.OK)
 				{
-					_videoSource.Stop();
-					_videoSource.Start();
+					StopVideoSource();
+					StartVideoSource();
 				}
 			}
 		}
 
 		private void OnListsToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			_videoSource.Stop();
-			_videoSource.Close();
+			//_videoSource.Stop();
+			//_videoSource.Close();
 
-			var state = _videoSource.State;
+			//var state = _videoSource.State;
 
-			if(_videoSource != null)
-			{
-				_videoSource.DetachAllMatrices();
-				_videoSource.MatrixUpdated -= OnMatrixUpdated;
-			}
+			//if(_videoSource != null)
+			//{
+			//	_videoSource.DetachAllMatrices();
+			//	_videoSource.MatrixUpdated -= OnMatrixUpdated;
+			//}
+
+			CloseVideoSource();
 
 			_recognizer.FaceRecognized -= OnFaceRecognized;
 
-			using(var formLists = new UserLists(_container))
+			using(var formLists = new UserLists(_container, _videoSource))
 			{
 				formLists.ShowDialog(this);
 			}
 
-			_videoSource.MatrixUpdated += OnMatrixUpdated;
 			_recognizer.FaceRecognized += OnFaceRecognized;
 
-			_videoSource.AttachMatrix(_matrix);
+			StartVideoSource();
+			//_videoSource.MatrixUpdated += OnMatrixUpdated;
 
-			_videoSource.Open();
-			_videoSource.Start();
+			//_videoSource.AttachMatrix(_matrix);
+
+			//_videoSource.Open();
+			//_videoSource.Start();
 		}
 
 		#endregion

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -20,7 +20,7 @@ namespace Recognizer
 	public partial class UserLists : Form
 	{
 		private IComponentContext _container;
-
+		private IVideoSource _videoSource;
 		private RecognitionLogController _recognitionLogController;
 
 		public UserLists()
@@ -29,13 +29,14 @@ namespace Recognizer
 			Font = SystemFonts.MessageBoxFont;
 		}
 
-		public UserLists(IComponentContext container)
+		public UserLists(IComponentContext container, IVideoSource videoSource)
 		{
 			InitializeComponent();
 			Font = SystemFonts.MessageBoxFont;
 
-			_container = container;
+			_videoSource = videoSource;
 
+			_container = container;
 			_recognitionLogController = container.Resolve<RecognitionLogController>();
 			_recognitionLogController.DataGridView = _dataGridView;
 		}
@@ -77,7 +78,7 @@ namespace Recognizer
 
 		private void _btnAddEmployee_Click(object sender, EventArgs e)
 		{
-			using(var addEmployee = new AddNewEmployeeForm(_container))
+			using(var addEmployee = new AddNewEmployeeForm(_container, _videoSource))
 			{
 				if(addEmployee.ShowDialog(this) == DialogResult.OK)
 				{
