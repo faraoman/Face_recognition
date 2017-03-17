@@ -50,7 +50,6 @@ namespace Recognizer
 
 
 		#region .ctor
-
 		public AddNewEmployeeForm(IComponentContext container, IVideoSource videoSource)
 		{
 			Verify.Argument.IsNotNull(container, nameof(container));
@@ -122,7 +121,6 @@ namespace Recognizer
 		#endregion
 
 		#region Methods
-
 		private void InitializeRecognizer()
 		{
 			_detector = _container.Resolve<FaceDetector>();
@@ -218,7 +216,6 @@ namespace Recognizer
 		private void OnAddNewEmployeeFormClosing(object sender, FormClosingEventArgs e)
 		{
 			CloseVideoSource();
-
 			_recognizer.FaceRecognized -= OnFaceRecognized;
 		}
 
@@ -468,7 +465,6 @@ namespace Recognizer
 						break;
 					}
 				}
-			}
 		}
 	}
 }
